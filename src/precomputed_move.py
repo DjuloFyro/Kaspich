@@ -1,6 +1,6 @@
 import numpy as np
 from square import Square
-from enums import File, Rank
+from enums import File, Rank, Color
 
 # Define an empty bitboard to represent an empty chessboard
 EMPTY_BB = np.uint64(0)
@@ -47,4 +47,4 @@ KING_MOVES = np.fromiter(
 )
 
 if __name__ == "__main__":
-    print(KING_MOVES)
+    print(str(Color.BLACK))

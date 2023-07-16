@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import IntEnum
 
-class PieceType(Enum):
+class PieceType(IntEnum):
     PAWN = 0
     KNIGHT = 1
     BISHOP = 2
@@ -8,11 +8,11 @@ class PieceType(Enum):
     QUEEN = 4
     KING = 5
 
-class Color(Enum):
+class Color(IntEnum):
     WHITE = 0
     BLACK = 1
 
-class Rank(Enum):
+class Rank(IntEnum):
     ONE = 0
     TWO = 1
     THREE = 2
@@ -22,7 +22,7 @@ class Rank(Enum):
     SEVEN = 6
     EIGHT = 7
 
-class File(Enum):
+class File(IntEnum):
     A = 0
     B = 1
     C = 2

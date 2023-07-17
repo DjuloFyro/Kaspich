@@ -86,18 +86,6 @@ def precompute_pawns_move(index, color):
     return single_push | double_push | capture
 
 
-# Precompute pawn moves for all squares on the chessboard for both colors
-WHITE_PAWN_MOVES = np.fromiter(
-    (precompute_pawns_move(i, Color.WHITE) for i in range(64)),
-    dtype=np.uint64,
-    count=64
-)
-
-BLACK_PAWN_MOVES = np.fromiter(
-    (precompute_pawns_move(i, Color.BLACK) for i in range(64)),
-    dtype=np.uint64,
-    count=64
-)
 
 if __name__ == "__main__":
     print(KNIGHT_MOVES)

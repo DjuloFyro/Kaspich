@@ -70,8 +70,20 @@ KNIGHT_MOVES = np.fromiter(
     count=64
 )
 
-def precompute_pawns_move(index):
-    pass
+def precompute_pawns_move(index, color):
+    square = Square(index)
+    bitboard = square.to_bitboard()
+
+    if color == Color.WHITE:
+        single_push = (bitboard & ~RANKS[Rank.EIGHT]) << np.uint8(8)
+        double_push = (single_push & RANKS[Rank.THREE]) << np.uint8(8)
+        capture = ((bitboard & ~FILES[File.A] & ~RANKS[Rank.EIGHT]) << np.uint8(7) | (bitboard & ~FILES[File.H] & ~RANKS[Rank.EIGHT]) << np.uint8(9))
+    else: # Color = BLACK
+        single_push = (bitboard & ~RANKS[Rank.ONE]) >> np.uint8(8)
+        double_push = (single_push & RANKS[Rank.SIX]) >> np.uint8(8)
+        capture = ((bitboard & ~FILES[File.A] & ~RANKS[Rank.ONE]) >> np.uint8(9) | (bitboard & ~FILES[File.H] & ~RANKS[Rank.ONE]) >> np.uint8(7))
+    
+    return single_push | double_push | capture
 
 if __name__ == "__main__":
     print(KNIGHT_MOVES)

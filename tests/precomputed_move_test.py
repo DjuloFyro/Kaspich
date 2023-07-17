@@ -29,7 +29,7 @@ class TestPrecomputedMode(unittest.TestCase):
         # Compare the precomputed king moves with the expected moves
         self.assertTrue(np.array_equal(expected_king_moves, KING_MOVES))
 
-    def test_precomputed_kings_move(self) -> None:
+    def test_precomputed_knights_move(self) -> None:
         """
         Test if the precomputed king moves are calculated correctly.
 

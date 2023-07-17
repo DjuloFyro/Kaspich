@@ -33,9 +33,9 @@ class TestPrecomputedMode(unittest.TestCase):
         """
         Test if the precomputed king moves are calculated correctly.
 
-        The precomputed king moves are compared with the expected moves for each square on the chessboard.
+        The precomputed knight moves are compared with the expected moves for each square on the chessboard.
         """
-        # Define the expected king moves for each square on the chessboard
+        # Define the expected knight moves for each square on the chessboard
         expected_knight_moves = np.array([
             132096, 329728, 659712, 1319424, 2638848, 5277696, 10489856, 4202496,
             33816580, 84410376, 168886289, 337772578, 675545156, 1351090312, 2685403152,

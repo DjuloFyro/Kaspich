@@ -70,5 +70,8 @@ KNIGHT_MOVES = np.fromiter(
     count=64
 )
 
+def precompute_pawns_move(index):
+    pass
+
 if __name__ == "__main__":
     print(KNIGHT_MOVES)

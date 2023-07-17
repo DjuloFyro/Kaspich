@@ -46,5 +46,29 @@ KING_MOVES = np.fromiter(
     count=64
 )
 
+def precompute_knights_move(index):
+    square = Square(index)
+    bitboard = square.to_bitboard()
+
+    wn = (bitboard & ~FILES[File.A] & ~FILES[File.B] & ~RANKS[Rank.EIGHT]) << np.uint8(6)
+    ws = (bitboard & ~FILES[File.A] & ~FILES[File.B] & ~RANKS[Rank.ONE]) >> np.uint8(10)
+
+    nw = (bitboard & ~FILES[File.A] & ~RANKS[Rank.SEVEN] & ~RANKS[Rank.EIGHT]) << np.uint8(15)
+    ne = (bitboard & ~FILES[File.H] & ~RANKS[Rank.SEVEN] & ~RANKS[Rank.EIGHT]) << np.uint8(17)
+
+    en = (bitboard & ~FILES[File.G] & ~FILES[File.H] & ~RANKS[Rank.EIGHT]) << np.uint8(10)
+    es = (bitboard & ~FILES[File.G] & ~FILES[File.H] & ~RANKS[Rank.ONE]) >> np.uint8(6)
+
+    se = (bitboard & ~FILES[File.H] & ~RANKS[Rank.ONE] & ~RANKS[Rank.TWO]) >> np.uint8(15)
+    sw = (bitboard & ~FILES[File.A] & ~RANKS[Rank.ONE] & ~RANKS[Rank.TWO]) >> np.uint8(17)
+
+    return wn | ws | nw | ne | en | es | se | sw
+
+KNIGHT_MOVES = np.fromiter(
+    (precompute_knights_move(i) for i in range(64)),
+    dtype=np.uint64,
+    count=64
+)
+
 if __name__ == "__main__":
-    print(str(Color.BLACK))
+    print(KNIGHT_MOVES)

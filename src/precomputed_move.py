@@ -47,9 +47,19 @@ KING_MOVES = np.fromiter(
 )
 
 def precompute_knights_move(index):
+    """
+    Precompute the knight's moves for a given square index on the chessboard.
+
+    Parameters:
+        index (int): The index of the square on the chessboard (0 to 63).
+
+    Returns:
+        np.uint64: A bitboard representing all possible moves for the knight from the given square.
+    """
     square = Square(index)
     bitboard = square.to_bitboard()
 
+    # Calculate possible moves in different directions using bitwise operations
     wn = (bitboard & ~FILES[File.A] & ~FILES[File.B] & ~RANKS[Rank.EIGHT]) << np.uint8(6)
     ws = (bitboard & ~FILES[File.A] & ~FILES[File.B] & ~RANKS[Rank.ONE]) >> np.uint8(10)
 
@@ -71,6 +81,16 @@ KNIGHT_MOVES = np.fromiter(
 )
 
 def precompute_pawns_move(index, color):
+    """
+    Precompute the pawn's moves for a given square index on the chessboard.
+
+    Parameters:
+        index (int): The index of the square on the chessboard (0 to 63).
+        color (Color): The color of the pawn
+
+    Returns:
+        np.uint64: A bitboard representing all possible moves for the pawn from the given square.
+    """
     square = Square(index)
     bitboard = square.to_bitboard()
 
@@ -84,6 +104,16 @@ def precompute_pawns_move(index, color):
     return single_push | double_push
 
 def precompute_pawns_capture(index, color):
+    """
+    Precompute the pawn's capture for a given square index on the chessboard.
+
+    Parameters:
+        index (int): The index of the square on the chessboard (0 to 63).
+        color (Color): The color of the pawn
+
+    Returns:
+        np.uint64: A bitboard representing all possible moves for the pawn from the given square.
+    """
     square = Square(index)
     bitboard = square.to_bitboard()
     

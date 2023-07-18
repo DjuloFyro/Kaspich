@@ -42,5 +42,17 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(expected_position_1, get_position_1)
         self.assertEqual(expected_position_3, get_position_3)
 
+    def test_generate_pawn_moves(self) -> None:
+        square_1 = Square(1)
+        square_3 = Square(3)
+        expected_position_1 = 512
+        expected_position_3 = 2048
+
+        get_position_1 = generate_pawn_moves(self.board, square_1)
+        get_position_3 = generate_pawn_moves(self.board, square_3)
+
+        self.assertEqual(expected_position_1, get_position_1)
+        self.assertEqual(expected_position_3, get_position_3)
+
 if __name__ == "__main__":
     unittest.main()

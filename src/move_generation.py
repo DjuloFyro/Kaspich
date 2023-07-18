@@ -4,15 +4,19 @@ from board import Board
 from square import Square
 from precomputed_move import *
 
-def generate_king_moves(board: Board, square: Square) -> np.array:
+
+def opposite_color(color):
+    return Color.WHITE if color == Color.BLACK else Color.BLACK
+
+def generate_king_moves(board: Board, square: Square) -> np.uint64:
     # Generate legal moves for the king on the given square
     return KING_MOVES[square.position] & ~board.same_color[board.color_turn]
 
-def generate_knight_moves(board: Board, square: Square) -> np.array:
+def generate_knight_moves(board: Board, square: Square) -> np.uint64:
     # Generate legal moves for the knight on the given square
     return KNIGHT_MOVES[square.position] & ~board.same_color[board.color_turn]
 
-def generate_pawn_moves(board: Board, square: Square) -> np.array:
+def generate_pawn_moves(board: Board, square: Square) -> np.uint64:
     """
     Generate legal moves for the pawn on the given square.
 
@@ -23,30 +27,36 @@ def generate_pawn_moves(board: Board, square: Square) -> np.array:
     Returns:
         np.array: An array of bitboards representing all legal moves for the pawn.
     """
-    pawn_moves = precompute_pawns_move(square.position, board.color_turn)
 
     # Filter out moves that collide with friendly pieces
-    valid_moves = pawn_moves & ~board.all_pieces
+    pawn_moves = PAWN_MOVE[board.color_turn][square.position] & ~board.all_pieces
 
     # For captures, filter out moves that do not capture an opponent's piece
-    captures = pawn_moves & board.same_color[board.color_turn]
+    captures = PAWN_ATTACKS[board.color_turn][square.position] & board.same_color[opposite_color(board.color_turn)]
 
-    return valid_moves | captures
+    return pawn_moves | captures
 
-def generate_bishop_moves(board: Board, square: Square) -> np.array:
+def generate_bishop_moves(board: Board, square: Square) -> np.uint64:
     # Generate legal moves for the bishop on the given square
     pass
 
-def generate_rook_moves(board: Board, square: Square) -> np.array:
+def generate_rook_moves(board: Board, square: Square) -> np.uint64:
     # Generate legal moves for the rook on the given square
     pass
 
-def generate_queen_moves(board: Board, square: Square) -> np.array:
+def generate_queen_moves(board: Board, square: Square) -> np.uint64:
     # Generate legal moves for the queen on the given square
     pass
 
-def generate_moves(board: Board, piece_type: str) -> np.array:
+def generate_moves(board: Board, piece_type: str) -> np.uint64:
     # Generate legal moves for all pieces of the given type on the board
     pass
 
 
+def main():
+    board = Board()
+    square = Square(1)
+    print(generate_pawn_moves(board=board, square=square))
+
+if __name__ == "__main__":
+    main()

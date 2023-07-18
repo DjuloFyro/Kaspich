@@ -77,14 +77,36 @@ def precompute_pawns_move(index, color):
     if color == Color.WHITE:
         single_push = (bitboard & ~RANKS[Rank.EIGHT]) << np.uint8(8)
         double_push = (single_push & RANKS[Rank.THREE]) << np.uint8(8)
-        capture = ((bitboard & ~FILES[File.A] & ~RANKS[Rank.EIGHT]) << np.uint8(7) | (bitboard & ~FILES[File.H] & ~RANKS[Rank.EIGHT]) << np.uint8(9))
     else: # Color = BLACK
         single_push = (bitboard & ~RANKS[Rank.ONE]) >> np.uint8(8)
         double_push = (single_push & RANKS[Rank.SIX]) >> np.uint8(8)
-        capture = ((bitboard & ~FILES[File.A] & ~RANKS[Rank.ONE]) >> np.uint8(9) | (bitboard & ~FILES[File.H] & ~RANKS[Rank.ONE]) >> np.uint8(7))
     
-    return single_push | double_push | capture
+    return single_push | double_push
 
+def precompute_pawns_capture(index, color):
+    square = Square(index)
+    bitboard = square.to_bitboard()
+    
+    if color == Color.WHITE:
+        capture = ((bitboard & ~FILES[File.A] & ~RANKS[Rank.EIGHT]) << np.uint8(7) | (bitboard & ~FILES[File.H] & ~RANKS[Rank.EIGHT]) << np.uint8(9))
+    else: # Color = BLACK
+        capture = ((bitboard & ~FILES[File.A] & ~RANKS[Rank.ONE]) >> np.uint8(9) | (bitboard & ~FILES[File.H] & ~RANKS[Rank.ONE]) >> np.uint8(7))
+
+    return capture
+
+PAWN_MOVE = np.fromiter(
+    (precompute_pawns_move(i, color)  for color in Color for i in range(64)),
+    dtype=np.uint64,
+    count=2*64
+)
+PAWN_MOVE.shape = (2,64)
+
+PAWN_CAPTURE = np.fromiter(
+    (precompute_pawns_capture(i, color)  for color in Color for i in range(64)),
+    dtype=np.uint64,
+    count=2*64
+)
+PAWN_CAPTURE.shape = (2,64)
 
 
 if __name__ == "__main__":

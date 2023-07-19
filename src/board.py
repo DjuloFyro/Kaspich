@@ -26,6 +26,18 @@ class Board:
 
         # Color to play
         self.color_turn = Color.WHITE
+    
+    def opposite_color(color):
+        """
+        Get the oppsite color (WHITE -> BLACK) (BLACK -> WHITE).
+
+        Parameters:
+            color (Color): The Color.
+
+        Returns:
+            Color: The opposite color.
+        """
+        return Color.WHITE if color == Color.BLACK else Color.BLACK
 
     def board_initialization(self):
         """
@@ -240,14 +252,14 @@ class Board:
         """
         # Create a new board and copy the piece positions, color, and combined bitboards from the original board
         new_board = Board()
-        new_board.kings = np.copy(self.kings)
-        new_board.knights = np.copy(self.knights)
-        new_board.pawns = np.copy(self.pawns)
-        new_board.bishops = np.copy(self.bishops)
-        new_board.rooks = np.copy(self.rooks)
-        new_board.queens = np.copy(self.queens)
+        new_board.kings = dict.copy(self.kings)
+        new_board.knights = dict.copy(self.knights)
+        new_board.pawns = dict.copy(self.pawns)
+        new_board.bishops = dict.copy(self.bishops)
+        new_board.rooks = dict.copy(self.rooks)
+        new_board.queens = dict.copy(self.queens)
 
-        new_board.same_color = np.copy(self.same_color)
+        new_board.same_color = dict.copy(self.same_color)
         new_board.all_pieces = np.copy(self.all_pieces)
         new_board.color_turn = self.color_turn
 
@@ -256,13 +268,13 @@ class Board:
 
         # Clear the source square and the destination square (in case of a capture) on the new board
         new_board.clear_square(move.src)
-        new_board.clear_square(move.dest, ~new_board.color_turn)  # Clear the destination square for the opponent's color
+        new_board.clear_square(move.dest, Board.opposite_color(new_board.color_turn))  # Clear the destination square for the opponent's color
 
         # Set the piece on the destination square, considering promotion if applicable
         new_board.set_square(move.dest, piece if move.promo is None else move.promo)
 
         # Update the color turn on the new board
-        new_board.color_turn = ~new_board.color_turn
+        new_board.color_turn = Board.opposite_color(new_board.color_turn)
 
         # Return the new board with the move applied
         return new_board

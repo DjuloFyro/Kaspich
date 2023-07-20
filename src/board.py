@@ -90,6 +90,114 @@ class Board:
                 print(piece, end=' ')
             print()
 
+    @staticmethod
+    def from_fen(fen):
+        """
+        Create a Board instance from a FEN string.
+
+        Parameters:
+            fen (str): The FEN string representing the board position.
+
+        Returns:
+            Board: The Board instance initialized from the FEN string.
+        """
+        board = Board()
+
+        # Split the FEN string into parts: position, turn, castling, en passant, and half move clock
+        parts = fen.split(" ")
+
+        # Set the piece positions on the board
+        rank = 7
+        file = 0
+        for char in parts[0]:
+            if char == '/':
+                rank -= 1
+                file = 0
+            elif char.isdigit():
+                file += int(char)
+            else:
+                color = Color.WHITE if char.isupper() else Color.BLACK
+                piece = PieceType.from_char(char.lower())
+                square = Square(rank * 8 + file)
+                board.set_square(square, piece, color)
+                file += 1
+
+        # Set the color to play
+        if parts[1].lower() == 'w':
+            board.color_turn = Color.WHITE
+        else:
+            board.color_turn = color.BLACK
+
+        # Castling
+        # TODO
+
+        # En passant
+        # TODO
+
+        # Halfmove Clock
+        # TODO
+
+        #FullMove number
+        # TODO
+
+        return board
+
+    def to_fen(self):
+        """
+        Create a Fen string from a new chessboard instance.
+
+        Returns:
+            String: The Fen string corresponding to the Board class initialized.
+        """
+        fen = []
+        for rank in range(7, -1, -1):
+            empty_square = 0
+            fen_row = ""
+
+            for file in range(0, 8):
+                square = Square(rank * 8 + file)
+                color = Color.WHITE
+                piece = self.piece_on(square, color)
+                if piece == None:
+                    color = Color.BLACK
+                    piece = self.piece_on(square, color)
+
+                if piece == None:
+                    empty_square += 1
+                else:
+                    if empty_square > 0:
+                        fen_row += str(empty_square)
+                        empty_square = 0
+                    fen_row += piece.to_char() if color == Color.BLACK else piece.to_char().upper()
+            
+            if empty_square > 0:
+                fen_row += str(empty_square)
+            
+            fen.append(fen_row)
+
+        str_fen = "/".join(fen)
+
+        if self.color_turn == Color.WHITE:
+            str_fen += " w"
+        else:
+            str_fen += " b"
+
+        # Castling (to change)
+        str_fen += " KQkq"
+
+        # En passant (to change)
+        str_fen += " -"
+
+        # Halfmove Clock (to change)
+        str_fen += " 0"
+
+        #FullMove number
+        str_fen += " 1"
+
+        return str_fen
+        
+
+
     def get_piece_bb(self, piece_type: PieceType, color: Color = None):
         """
         Get the bitboard representation of a specific piece for the given color on the chessboard.
@@ -278,3 +386,12 @@ class Board:
 
         # Return the new board with the move applied
         return new_board
+
+
+def main():
+    fen = "8/8/8/4p1K1/2k1P3/8/8/8 b - - 0 1"
+    board = Board.from_fen(fen=fen)
+    board.print_board()
+
+if __name__ == "__main__":
+    main()

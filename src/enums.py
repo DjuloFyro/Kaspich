@@ -9,6 +9,34 @@ class PieceType(IntEnum):
     QUEEN = 4
     KING = 5
 
+    def to_char(self):
+        if self == PieceType.PAWN:
+            return 'p'
+        elif self == PieceType.KNIGHT:
+            return 'n'
+        elif self == PieceType.BISHOP:
+            return 'b'
+        elif self == PieceType.ROOK:
+            return 'r'
+        elif self == PieceType.QUEEN:
+            return 'q'
+        elif self == PieceType.KING:
+            return 'k'
+    
+    def from_char(repr):
+        if repr == 'p':
+            return PieceType.PAWN
+        elif repr == 'n':
+            return PieceType.KNIGHT
+        elif repr == 'b':
+            return PieceType.BISHOP
+        elif repr == 'r':
+            return PieceType.ROOK
+        elif repr == 'q':
+            return PieceType.QUEEN
+        elif repr == 'k':
+            return PieceType.KING
+
 class Color(IntEnum):
     """Enumeration representing the color of a chess piece."""
     WHITE = 0

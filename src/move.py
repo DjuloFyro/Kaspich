@@ -1,4 +1,4 @@
-class Move(object):
+class Move:
     def __init__(self, src, dest, promo=None):
         """
         src is Square representing source square
@@ -8,3 +8,9 @@ class Move(object):
         self.src = src
         self.dest = dest
         self.promo = promo
+
+    def __str__(self):
+        if self.promo:
+            return "%s -> %s = %s" % (str(self.src), str(self.dest), self.promo.name)
+        else:
+            return "%s -> %s" % (str(self.src), str(self.dest))

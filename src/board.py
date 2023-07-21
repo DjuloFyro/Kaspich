@@ -1,9 +1,23 @@
+"""
+This file defines a chessboard representation and various operations related to it.
+
+The following class is defined in this file:
+
+1. Board: Class representing the chessboard and operations related to it.
+
+The Board class provides methods to initialize the chessboard with starting positions, set and clear pieces on squares,
+and apply moves to the chessboard, among other utility functions. It also includes methods to convert the chessboard
+representation to and from Forsyth-Edwards Notation (FEN) strings, which is a standard notation to represent the state
+of a chess game.
+"""
+
 import numpy as np
 
 from enums import Color
 import utils
 from enums import PieceType
 from square import Square
+from move import Move
 
 class Board:
     def __init__(self):
@@ -344,7 +358,7 @@ class Board:
         self.same_color[color] = utils.clear_square(combined_bb, square)
         self.all_pieces = utils.clear_square(all_bb, square)
 
-    def apply_move(self, move):
+    def apply_move(self, move: Move):
         """
         Applies a move to the chessboard and returns a new board without modifying the original.
 

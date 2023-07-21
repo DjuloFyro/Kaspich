@@ -1,3 +1,12 @@
+"""
+This file defines various enumerations used in a chess implementation.
+
+- PieceType: Enumeration representing the type of a chess piece.
+- Color: Enumeration representing the color of a chess piece.
+- Rank: Enumeration representing the ranks (rows) on a chessboard.
+- File: Enumeration representing the files (columns) on a chessboard.
+"""
+
 from enum import IntEnum
 
 class PieceType(IntEnum):
@@ -9,7 +18,12 @@ class PieceType(IntEnum):
     QUEEN = 4
     KING = 5
 
-    def to_char(self):
+    def to_char(self) -> str:
+        """Convert the PieceType enum value to its corresponding character representation.
+
+        Returns:
+            str: The character representation of the PieceType ('p', 'n', 'b', 'r', 'q', or 'k').
+        """
         if self == PieceType.PAWN:
             return 'p'
         elif self == PieceType.KNIGHT:
@@ -22,20 +36,34 @@ class PieceType(IntEnum):
             return 'q'
         elif self == PieceType.KING:
             return 'k'
-    
-    def from_char(repr):
-        if repr == 'p':
+
+    @classmethod
+    def from_char(cls, char_repr: str) -> 'PieceType':
+        """Convert the character representation to the corresponding PieceType enum value.
+
+        Args:
+            char_repr (str): The character representation of the PieceType ('p', 'n', 'b', 'r', 'q', or 'k').
+
+        Returns:
+            PieceType: The corresponding PieceType enum value.
+        
+        Raises:
+            ValueError: If the provided character representation is not a valid PieceType.
+        """
+        if char_repr == 'p':
             return PieceType.PAWN
-        elif repr == 'n':
+        elif char_repr == 'n':
             return PieceType.KNIGHT
-        elif repr == 'b':
+        elif char_repr == 'b':
             return PieceType.BISHOP
-        elif repr == 'r':
+        elif char_repr == 'r':
             return PieceType.ROOK
-        elif repr == 'q':
+        elif char_repr == 'q':
             return PieceType.QUEEN
-        elif repr == 'k':
+        elif char_repr == 'k':
             return PieceType.KING
+        else:
+            raise ValueError(f"Invalid character representation '{char_repr}' for PieceType.")
 
 class Color(IntEnum):
     """Enumeration representing the color of a chess piece."""

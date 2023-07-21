@@ -1,4 +1,6 @@
 """
+enums.py - Chess Components Representation
+
 This file defines various enumerations used in a chess implementation.
 
 - PieceType: Enumeration representing the type of a chess piece.

@@ -1,3 +1,12 @@
+"""
+precomputed_move.py - Chess Moves Precomputation
+
+This module provides functions and precomputed data for generating legal moves for different chess pieces on a chessboard.
+The precomputed data includes masks for each rank and file, diagonal and anti-diagonal masks, and precomputed moves for kings and knights.
+The module also defines functions for precomputing pawn moves and captures, as well as calculating first rank moves for pieces based on the occupancy of the rank.
+"""
+
+
 import numpy as np
 from square import Square
 from enums import File, Rank, Color
@@ -19,8 +28,17 @@ ANTIDIAG = np.uint64(0x0102040810204080)
 
 CENTER = np.uint64(0x00003C3C3C3C0000)
 
-def compute_diag_mask(i):
-    diag = 8*(i & 7) - (i & 56)
+def compute_diag_mask(index: np.uint8) -> np.uint64:
+    """
+    Compute the diagonal mask for the given index 'i'.
+
+    Parameters:
+        index (np.uint8): Index of the square (0 to 63).
+
+    Returns:
+        np.uint64: Bitboard representing the diagonal mask for the given index.
+    """
+    diag = 8*(index & 7) - (index & 56)
     n = -diag & (diag >> 31)
     s = diag & (-diag >> 31)
     return (DIAG >> np.uint8(s)) << np.uint8(n)
@@ -30,8 +48,17 @@ DIAG_MASKS = np.fromiter(
         dtype=np.uint64,
         count=64)
 
-def compute_antidiag_mask(i):
-    diag = 56 - 8*(i & 7) - (i & 56)
+def compute_antidiag_mask(index: np.uint8) -> np.uint64:
+    """
+    Compute the anti-diagonal mask for the given index 'i'.
+
+    Parameters:
+        index (np.uint8): Index of the square (0 to 63).
+
+    Returns:
+        np.uint64: Bitboard representing the anti-diagonal mask for the given index.
+    """
+    diag = 56 - 8*(index & 7) - (index & 56)
     n = -diag & (diag >> 31)
     s = diag & (-diag >> 31)
     return (ANTIDIAG >> np.uint8(s)) << np.uint8(n)
@@ -41,13 +68,13 @@ ANTIDIAG_MASKS = np.fromiter(
         dtype=np.uint64,
         count=64)
 
-def precompute_kings_move(index):
+def precompute_kings_move(index: np.uint8) -> np.uint64:
     """
     Precompute the king's moves for a given square index on the chessboard.
 
     Parameters:
-        index (int): The index of the square on the chessboard (0 to 63).
-
+        index (np.uint8): The index of the square on the chessboard (0 to 63).
+s
     Returns:
         np.uint64: A bitboard representing all possible moves for the king from the given square.
     """
@@ -74,12 +101,12 @@ KING_MOVES = np.fromiter(
     count=64
 )
 
-def precompute_knights_move(index):
+def precompute_knights_move(index: np.uint8) -> np.uint64:
     """
     Precompute the knight's moves for a given square index on the chessboard.
 
     Parameters:
-        index (int): The index of the square on the chessboard (0 to 63).
+        index (np.uint8): The index of the square on the chessboard (0 to 63).
 
     Returns:
         np.uint64: A bitboard representing all possible moves for the knight from the given square.
@@ -108,12 +135,12 @@ KNIGHT_MOVES = np.fromiter(
     count=64
 )
 
-def precompute_pawns_move(index, color):
+def precompute_pawns_move(index: np.uint8, color: Color) -> np.uint64:
     """
     Precompute the pawn's moves for a given square index on the chessboard.
 
     Parameters:
-        index (int): The index of the square on the chessboard (0 to 63).
+        index (np.uint8): The index of the square on the chessboard (0 to 63).
         color (Color): The color of the pawn
 
     Returns:
@@ -131,12 +158,12 @@ def precompute_pawns_move(index, color):
     
     return single_push | double_push
 
-def precompute_pawns_capture(index, color):
+def precompute_pawns_capture(index: np.uint8, color: Color) -> np.uint64:
     """
     Precompute the pawn's capture for a given square index on the chessboard.
 
     Parameters:
-        index (int): The index of the square on the chessboard (0 to 63).
+        index (np.uint8): The index of the square on the chessboard (0 to 63).
         color (Color): The color of the pawn
 
     Returns:
@@ -166,13 +193,13 @@ PAWN_CAPTURE = np.fromiter(
 )
 PAWN_CAPTURE.shape = (2,64)
 
-def compute_first_rank_moves(square_index, occupancy):
+def compute_first_rank_moves(square_index: np.uint8, occupancy: np.uint8) -> np.uint8:
     """
     Calculate the first rank moves for a given square on a rank based on the occupancy of the rank.
 
     Parameters:
-        square_index (int): The index of the square (0 to 7).
-        occupancy (int): 8-bit number representing the occupancy of the rank.
+        square_index (np.uint8): The index of the square (0 to 7).
+        occupancy (np.uint8): 8-bit number representing the occupancy of the rank.
 
     Returns:
         np.uint8: First rank moves (as uint8).

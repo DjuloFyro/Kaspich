@@ -1,3 +1,10 @@
+"""
+square.py - Chess Square Representation
+
+This module defines the Square class representing a position on the chessboard and provides methods to convert the square's position 
+to a bitboard representation and obtain its string representation in algebraic notation.
+"""
+
 import numpy as np
 
 class Square:

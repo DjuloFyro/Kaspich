@@ -1,8 +1,18 @@
+"""
+move.py - Chess Move Representation
+
+This file defines the Move class, representing a chess move, along with related functions.
+
+The Move class encapsulates information about a single chess move, including the source square,
+destination square, and any promotion that may occur. It provides methods to convert a Move object
+to a human-readable algebraic notation string and to create a Move object from a string representation.
+"""
+
 import numpy as np
 from square import Square
 
 class Move:
-    def __init__(self, src, dest, promo=None):
+    def __init__(self, src: Square, dest: Square, promo=None):
         """
         src is Square representing source square
         dst is Square representing destination square
@@ -19,6 +29,15 @@ class Move:
             return "%s%s" % (str(self.src), str(self.dest))
     
     def from_str(s):
+        """
+        Convert a string representation of a chess move to a Move object.
+
+        Parameters:
+            s (str): The string representation of the move in algebraic notation, e.g., 'e2e4'.
+
+        Returns:
+            Move: The Move object representing the chess move.
+        """
         src_file = np.uint8(ord(s[0]) - 97)
         src_rank = np.uint8(s[1])
         dest_file = np.uint8(ord(s[2]) - 97)

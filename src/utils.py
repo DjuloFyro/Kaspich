@@ -1,6 +1,12 @@
+"""
+bitboard_utils.py - Chess Bitboard Utilities
+
+This module provides utility functions for working with bitboards, which are 64-bit integers used to represent the chessboard state efficiently.
+It includes functions for bit scanning, checking square occupancy, setting and clearing squares, and generating occupied squares from a bitboard.
+"""
+
 import numpy as np
 from square import Square
-from enums import File, Rank
 
 # Define an empty bitboard to represent an empty chessboard
 EMPTY_BITBOARD = np.uint64(0)
@@ -55,14 +61,7 @@ def occupied_squares(bitboard: np.uint64):
         bitboard ^= lsb_square.to_bitboard()
 
 
-def pop_count(bb):
-    count = np.uint8(0)
-    while bb != EMPTY_BITBOARD:
-        count += np.uint8(1)
-        bb &= bb - np.uint64(1)
-    return count
-
-
+'''
 # Precomputed lookup table for counting set bits in 16-bit parts
 BIT_COUNT_LOOKUP = np.array(
     [bin(i).count("1") for i in range(65536)],
@@ -85,10 +84,10 @@ def population_count(bb: np.uint64) -> np.uint8:
     count += BIT_COUNT_LOOKUP[(bb >> 32) & 0xFFFF]
     count += BIT_COUNT_LOOKUP[(bb >> 48) & 0xFFFF]
     return count
+'''
 
 
-
-def is_set(bitboard: np.uint64, square: Square):
+def is_set(bitboard: np.uint64, square: Square) -> bool:
     """
     Check if a particular square is set (has a bit value of 1) in the given bitboard.
 
@@ -104,7 +103,7 @@ def is_set(bitboard: np.uint64, square: Square):
     return (square.to_bitboard() & bitboard) != EMPTY_BITBOARD
 
 
-def clear_square(bitboard: np.uint64, square: Square):
+def clear_square(bitboard: np.uint64, square: Square) -> np.uint64:
     """
     Clear (set to 0) the bit corresponding to a particular square in the given bitboard.
 
@@ -120,7 +119,7 @@ def clear_square(bitboard: np.uint64, square: Square):
     return (~square.to_bitboard()) & bitboard
 
 
-def set_square(bitboard: np.uint64, square: Square):
+def set_square(bitboard: np.uint64, square: Square) -> np.uint64:
     """
     Set (set to 1) the bit corresponding to a particular square in the given bitboard.
 

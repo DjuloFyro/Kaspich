@@ -1,3 +1,10 @@
+"""
+move_generation.py - Chess Moves Generation
+
+This file contains functions for generating legal moves for different chess pieces on the board.
+It also includes a function to check if a move leaves the king in check after applying it to the board.
+"""
+
 import numpy as np
 import itertools
 
@@ -57,57 +64,81 @@ def generate_pawn_moves(board: Board, square: Square) -> np.uint64:
     return move | capture
 
 
-def get_diag_moves_bb(i, occ):
+def generate_diag_moves(index: np.uint8, occupancy: np.uint64) -> np.uint64:
     """
-    i is index of square
-    occ is the combined occupancy of the board
+    Generate the possible diagonal moves for the square 'i' on the chessboard.
+
+    Parameters:
+        index (np.uint8): Index of the square (0 to 63).
+        occupancy (np.uint64): Combined occupancy of the chessboard.
+
+    Returns:
+        np.uint64: Bitboard representing the possible diagonal moves for the given square.
     """
-    f = i & np.uint8(7)
-    occ = DIAG_MASKS[i] & occ # isolate diagonal occupancy
-    occ = (FILES[File.A] * occ) >> np.uint8(56) # map to first rank
-    occ = FILES[File.A] * FIRST_RANK_MOVES[f][occ] # lookup and map back to diagonal
-    return DIAG_MASKS[i] & occ
+    file = index & np.uint8(7)
+    occupancy = DIAG_MASKS[index] & occupancy # isolate diagonal occupancy
+    occupancy = (FILES[File.A] * occupancy) >> np.uint8(56) # map to first rank
+    occupancy = FILES[File.A] * FIRST_RANK_MOVES[file][occupancy] # lookup and map back to diagonal
+    return DIAG_MASKS[index] & occupancy
 
 
-def get_antidiag_moves_bb(i, occ):
+def generate_antidiag_moves(index: np.uint8, occupancy: np.uint64) -> np.uint64:
     """
-    i is index of square
-    occ is the combined occupancy of the board
+    Generate the possible antidiagonal moves for the square 'i' on the chessboard.
+
+    Parameters:
+        index (np.uint8): Index of the square (0 to 63).
+        occupancy (np.uint64): Combined occupancy of the chessboard.
+
+    Returns:
+        np.uint64: Bitboard representing the possible antidiagonal moves for the given square.
     """
-    f = i & np.uint8(7)
-    occ = ANTIDIAG_MASKS[i] & occ # isolate antidiagonal occupancy
-    occ = (FILES[File.A] * occ) >> np.uint8(56) # map to first rank
-    occ = FILES[File.A] * FIRST_RANK_MOVES[f][occ] # lookup and map back to antidiagonal
-    return ANTIDIAG_MASKS[i] & occ
+    file = index & np.uint8(7)
+    occupancy = ANTIDIAG_MASKS[index] & occupancy # isolate antidiagonal occupancy
+    occupancy = (FILES[File.A] * occupancy) >> np.uint8(56) # map to first rank
+    occupancy = FILES[File.A] * FIRST_RANK_MOVES[file][occupancy] # lookup and map back to antidiagonal
+    return ANTIDIAG_MASKS[index] & occupancy
 
 
-def get_rank_moves_bb(i, occ):
+def generate_rank_moves(index: np.uint8, occupancy: np.uint64) -> np.uint64:
     """
-    i is index of square
-    occ is the combined occupancy of the board
+    Generate the possible rank moves for the square 'i' on the chessboard.
+
+    Parameters:
+        index (np.uint8): Index of the square (0 to 63).
+        occupancy (np.uint64): Combined occupancy of the chessboard.
+
+    Returns:
+        np.uint64: Bitboard representing the possible rank moves for the given square.
     """
-    f = i & np.uint8(7)
-    occ = RANK_MASKS[i] & occ # isolate rank occupancy
-    occ = (FILES[File.A] * occ) >> np.uint8(56) # map to first rank
-    occ = FILES[File.A] * FIRST_RANK_MOVES[f][occ] # lookup and map back to rank
-    return RANK_MASKS[i] & occ
+    file = index & np.uint8(7)
+    occupancy = RANK_MASKS[index] & occupancy # isolate rank occupancy
+    occupancy = (FILES[File.A] * occupancy) >> np.uint8(56) # map to first rank
+    occupancy = FILES[File.A] * FIRST_RANK_MOVES[file][occupancy] # lookup and map back to rank
+    return RANK_MASKS[index] & occupancy
 
 
-def get_file_moves_bb(i, occ):
+def generate_file_moves(index: np.uint8, occupancy: np.uint64) -> np.uint64:
     """
-    i is index of square
-    occ is the combined occupancy of the board
+    Generate the possible file moves for the square 'i' on the chessboard.
+
+    Parameters:
+        index (np.uint8): Index of the square (0 to 63).
+        occupancy (np.uint64): Combined occupancy of the chessboard.
+
+    Returns:
+        np.uint64: Bitboard representing the possible file moves for the given square.
     """
-    f = i & np.uint8(7)
+    file = index & np.uint8(7)
     # Shift to A file
-    occ = FILES[File.A] & (occ >> f)
+    occupancy = FILES[File.A] & (occupancy >> file)
     # Map occupancy and index to first rank
-    occ = (DIAG * occ) >> np.uint8(56)
-    first_rank_index = (i ^ np.uint8(56)) >> np.uint8(3)
+    occupancy = (DIAG * occupancy) >> np.uint8(56)
+    first_rank_index = (index ^ np.uint8(56)) >> np.uint8(3)
     # Lookup moveset and map back to H file
-    occ = DIAG * FIRST_RANK_MOVES[first_rank_index][occ]
+    occupancy = DIAG * FIRST_RANK_MOVES[first_rank_index][occupancy]
     # Isolate H file and shift back to original file
-    return (FILES[File.H] & occ) >> (f ^ np.uint8(7))
+    return (FILES[File.H] & occupancy) >> (file ^ np.uint8(7))
 
 def generate_bishop_moves(board: Board, square: Square) -> np.uint64:
     """
@@ -120,8 +151,8 @@ def generate_bishop_moves(board: Board, square: Square) -> np.uint64:
     Returns:
         np.array: An array of bitboards representing all legal moves for the bishop.
     """
-    return ((get_diag_moves_bb(square.position, board.all_pieces) 
-        ^ get_antidiag_moves_bb(square.position, board.all_pieces))
+    return ((generate_diag_moves(square.position, board.all_pieces) 
+        ^ generate_antidiag_moves(square.position, board.all_pieces))
         & ~board.same_color[board.color_turn])
 
 def generate_rook_moves(board: Board, square: Square) -> np.uint64:
@@ -135,8 +166,8 @@ def generate_rook_moves(board: Board, square: Square) -> np.uint64:
     Returns:
         np.array: An array of bitboards representing all legal moves for the rook.
     """
-    return ((get_rank_moves_bb(square.position, board.all_pieces)
-        ^ get_file_moves_bb(square.position, board.all_pieces))
+    return ((generate_rank_moves(square.position, board.all_pieces)
+        ^ generate_file_moves(square.position, board.all_pieces))
         & ~board.same_color[board.color_turn])
 
 def generate_queen_moves(board: Board, square: Square) -> np.uint64:
@@ -152,8 +183,18 @@ def generate_queen_moves(board: Board, square: Square) -> np.uint64:
     """
     return generate_bishop_moves(square=square, board=board) | generate_rook_moves(square=square, board=board)
 
-def generate_moves(square: Square, board: Board, piece_type: PieceType) -> np.uint64:
-    # Define a dictionary that maps each piece type to its corresponding move generation function
+def generate_piece_moves(square: Square, board: Board, piece_type: PieceType):
+    """
+    Generate all possible moves for the given piece type on the board from the given square.
+
+    Parameters:
+        square (Square): The starting square of the piece.
+        board (Board): The chessboard state.
+        piece_type (PieceType): The type of the piece.
+
+    Yields:
+        Move: A move object representing a possible legal move.
+    """
     move_generators = {
         PieceType.PAWN: generate_pawn_moves,
         PieceType.KNIGHT: generate_knight_moves,
@@ -188,23 +229,44 @@ def generate_moves(square: Square, board: Board, piece_type: PieceType) -> np.ui
         yield Move(square, dest)
 
 
-def gen_moves(board: Board):
-    # NOTE: generates pseudo-legal moves
+def generate_pseudo_legal_moves(board: Board):
+    """
+    Generate pseudo-legal moves for all pieces on the board.
+
+    Parameters:
+        board (Board): The chessboard state.
+
+    Yields:
+        Move: A move object representing a possible pseudo-legal move.
+    """
     for piece in PieceType:
         piece_bb = board.get_piece_bb(piece)
         for src in utils.occupied_squares(piece_bb):
-            yield from generate_moves(src, board, piece)
+            yield from generate_piece_moves(src, board, piece)
 
 
-def gen_legal_moves(board):
-    return itertools.filterfalse(lambda m: leaves_in_check(board, m), gen_moves(board))
-
-def leaves_in_check(board: Board, move: Move):
+def generate_legal_moves(board: Board):
     """
-    Applies move to board and returns True iff king is left in check
+    Generate legal moves for the current player on the board.
 
-    Uses symmetry of attack e.g. if white knight attacks black king, then black knight on king sq would attack white knight
-    So it suffices to look at attacks of various pieces from king sq; if these hit opponent piece of same type then it's check
+    Parameters:
+        board (Board): The chessboard state.
+
+    Yields:
+        Move: A move object representing a possible legal move.
+    """
+    return itertools.filterfalse(lambda m: leaves_in_check(board, m), generate_pseudo_legal_moves(board))
+
+def leaves_in_check(board: Board, move: Move) -> bool:
+    """
+    Check if applying the given move to the board leaves the king in check.
+
+    Parameters:
+        board (Board): The chessboard state.
+        move (Move): The move to apply.
+
+    Returns:
+        bool: True if the move leaves the king in check, False otherwise.
     """
     board = board.apply_move(move=move)
     board.color_turn = Board.opposite_color(board.color_turn)
@@ -233,7 +295,6 @@ def leaves_in_check(board: Board, move: Move):
         return True
 
     return False
-
 
 
 def main():

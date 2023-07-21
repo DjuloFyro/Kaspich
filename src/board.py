@@ -1,9 +1,7 @@
 """
+board.py - Chess Board Representation
+
 This file defines a chessboard representation and various operations related to it.
-
-The following class is defined in this file:
-
-1. Board: Class representing the chessboard and operations related to it.
 
 The Board class provides methods to initialize the chessboard with starting positions, set and clear pieces on squares,
 and apply moves to the chessboard, among other utility functions. It also includes methods to convert the chessboard

@@ -1,6 +1,7 @@
 import numpy as np
 from square import Square
 from enums import File, Rank, Color
+import utils
 
 # Define an empty bitboard to represent an empty chessboard
 EMPTY_BB = np.uint64(0)
@@ -12,6 +13,33 @@ FILES = np.uint64(0x0101010101010101) << np.arange(8, dtype=np.uint64)
 # Precompute masks for each rank and file
 RANK_MASKS = RANKS.repeat(8)
 FILE_MASKS = np.tile(FILES, 8)
+
+DIAG = np.uint64(0x8040201008040201)
+ANTIDIAG = np.uint64(0x0102040810204080)
+
+CENTER = np.uint64(0x00003C3C3C3C0000)
+
+def compute_diag_mask(i):
+    diag = 8*(i & 7) - (i & 56)
+    n = -diag & (diag >> 31)
+    s = diag & (-diag >> 31)
+    return (DIAG >> np.uint8(s)) << np.uint8(n)
+
+DIAG_MASKS = np.fromiter(
+        (compute_diag_mask(i) for i in range(64)),
+        dtype=np.uint64,
+        count=64)
+
+def compute_antidiag_mask(i):
+    diag = 56 - 8*(i & 7) - (i & 56)
+    n = -diag & (diag >> 31)
+    s = diag & (-diag >> 31)
+    return (ANTIDIAG >> np.uint8(s)) << np.uint8(n)
+
+ANTIDIAG_MASKS = np.fromiter(
+        (compute_antidiag_mask(i) for i in range(64)),
+        dtype=np.uint64,
+        count=64)
 
 def precompute_kings_move(index):
     """
@@ -138,6 +166,59 @@ PAWN_CAPTURE = np.fromiter(
 )
 PAWN_CAPTURE.shape = (2,64)
 
+def compute_first_rank_moves(square_index, occupancy):
+    """
+    Calculate the first rank moves for a given square on a rank based on the occupancy of the rank.
+
+    Parameters:
+        square_index (int): The index of the square (0 to 7).
+        occupancy (int): 8-bit number representing the occupancy of the rank.
+
+    Returns:
+        np.uint8: First rank moves (as uint8).
+
+    """
+
+    # Define left_ray and right_ray lambda functions to handle the shifts
+    move_left = lambda x: x - np.uint8(1)
+    move_right = lambda x: (~x) & ~(x - np.uint8(1))
+
+    # Create a bitboard representing the square and cast the occupancy to np.uint8
+    square_bitboard = np.uint8(1) << np.uint8(square_index)
+    occupancy = np.uint8(occupancy)
+
+    # Calculate left attacks and left blockers
+    left_attacks = move_left(square_bitboard)
+    left_blockers = left_attacks & occupancy
+
+    # If there are left blockers, find the leftmost blocker and remove it from left_attacks
+    if left_blockers != np.uint8(0):
+        leftmost_blocker = np.uint8(1) << utils.msb_bitscan(np.uint64(left_blockers))
+        left_garbage = move_left(leftmost_blocker)
+        left_attacks ^= left_garbage
+
+    # Calculate right attacks and right blockers
+    right_attacks = move_right(square_bitboard)
+    right_blockers = right_attacks & occupancy
+
+    # If there are right blockers, find the rightmost blocker and remove it from right_attacks
+    if right_blockers != np.uint8(0):
+        rightmost_blocker = np.uint8(1) << utils.lsb_bitscan(np.uint64(right_blockers))
+        right_garbage = move_right(rightmost_blocker)
+        right_attacks ^= right_garbage
+
+    # Combine left_attacks and right_attacks to get the final result
+    return left_attacks ^ right_attacks
+
+FIRST_RANK_MOVES = np.fromiter(
+        (compute_first_rank_moves(i, occ)
+            for i in range(8) # 8 squares in a rank 
+            for occ in range(256)), # 2^8 = 256 possible occupancies of a rank
+        dtype=np.uint8,
+        count=8*256)
+FIRST_RANK_MOVES.shape = (8,256)
+
 
 if __name__ == "__main__":
-    print(KNIGHT_MOVES)
+    print(DIAG)
+

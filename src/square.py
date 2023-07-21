@@ -22,4 +22,4 @@ class Square:
     def __str__(self):
         r = self.position // 8
         f = self.position % 8
-        return "%s%d" % (chr(ord('A')+f), 1+r)
+        return "%s%d" % (chr(ord('a')+f), 1+r)

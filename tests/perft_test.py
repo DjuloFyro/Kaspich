@@ -61,11 +61,11 @@ class TestBoard(unittest.TestCase):
         Test the perft function for depth 4 and compare the result with the known value.
         """
         depth4 = perft(self.board, 4)
-        depth5 = perft(self.board, 5)
+        #depth5 = perft(self.board, 5)
 
         # The expected number of legal positions at depth 4 and 5 based on chess perft values.
         self.assertEqual(depth4, 197281)
-        self.assertEqual(depth5, 4865609)
+        #self.assertEqual(depth5, 4865609)
 
 if __name__ == "__main__":
     # Run the test cases

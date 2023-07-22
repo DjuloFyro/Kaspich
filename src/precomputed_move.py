@@ -179,6 +179,27 @@ def precompute_pawns_capture(index: np.uint8, color: Color) -> np.uint64:
 
     return capture
 
+def precompute_pawns_en_passant(index: np.uint8, color: Color) -> np.uint64:
+    """
+    Precompute the pawn's en-passant moves for a given square index on the chessboard.
+
+    Parameters:
+        index (np.uint8): The index of the square on the chessboard (0 to 63).
+        color (Color): The color of the pawn
+
+    Returns:
+        np.uint64: A bitboard representing all possible en-passant moves for the pawn from the given square.
+    """
+    square = Square(index)
+    bitboard = square.to_bitboard()
+
+    en_passant = EMPTY_BB
+    if (color == color.WHITE and (bitboard & RANKS[Rank.FIVE])):
+        en_passant = ((bitboard & ~FILES[File.H] & ~RANKS[Rank.EIGHT]) << np.uint8(9) | (bitboard & ~FILES[File.A] & ~RANKS[Rank.EIGHT]) << np.uint8(7))
+    elif (color == color.BLACK and (bitboard & RANKS[Rank.FOUR])):
+        en_passant = ((bitboard & ~FILES[File.H] & ~RANKS[Rank.ONE]) >> np.uint8(7) | (bitboard & ~FILES[File.A] & ~RANKS[Rank.ONE]) >> np.uint8(9))
+    return en_passant
+
 PAWN_MOVE = np.fromiter(
     (precompute_pawns_move(i, color)  for color in Color for i in range(64)),
     dtype=np.uint64,
@@ -192,6 +213,14 @@ PAWN_CAPTURE = np.fromiter(
     count=2*64
 )
 PAWN_CAPTURE.shape = (2,64)
+
+
+PAWN_ENPASSANT = np.fromiter(
+    (precompute_pawns_en_passant(i, color)  for color in Color for i in range(64)),
+    dtype=np.uint64,
+    count=2*64
+)
+PAWN_ENPASSANT.shape = (2,64)
 
 def compute_first_rank_moves(square_index: np.uint8, occupancy: np.uint8) -> np.uint8:
     """

@@ -17,6 +17,26 @@ class Square:
         """
         self.position = np.uint8(position)
 
+    @property
+    def rank(self):
+        """
+        Get the rank (row) of the square.
+
+        Returns:
+            int: The rank of the square (0 to 7).
+        """
+        return int(self.position // 8)
+
+    @property
+    def file(self):
+        """
+        Get the file (column) of the square.
+
+        Returns:
+            int: The file of the square (0 to 7).
+        """
+        return int(self.position % 8)
+
     def to_bitboard(self) -> np.uint64:
         """
         Convert the square's position to a bitboard representation.

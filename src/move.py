@@ -12,7 +12,7 @@ import numpy as np
 from square import Square
 
 class Move:
-    def __init__(self, src: Square, dest: Square, promo=None):
+    def __init__(self, src: Square, dest: Square, promo=None, en_passant: bool = False):
         """
         src is Square representing source square
         dst is Square representing destination square
@@ -21,6 +21,7 @@ class Move:
         self.src = src
         self.dest = dest
         self.promo = promo
+        self.en_passant = en_passant
 
     def __str__(self):
         if self.promo:
@@ -47,6 +48,10 @@ class Move:
         square_dest = Square(dest_rank * 8 + dest_file - 1)
 
         return Move(src=square_src, dest=square_dest)
+    
+    def is_double_push(self):
+        return abs(self.src.rank - self.dest.rank) == 2
+
 
 
 

@@ -38,6 +38,9 @@ class Board:
 
         # Color to play
         self.color_turn = Color.WHITE
+
+        # Initialize the en passant square attribute to None
+        self.en_passant_square = {Color.WHITE: None, Color.BLACK: None}
     
     def opposite_color(color):
         """
@@ -359,13 +362,10 @@ class Board:
     def apply_move(self, move: Move):
         """
         Applies a move to the chessboard and returns a new board without modifying the original.
-
         Parameters:
             move (Move): The move to be applied to the chessboard.
-
         Returns:
             Board: A new board with the move applied.
-
         Note:
             This method creates a new board and copies the piece positions, color, and combined bitboards
             from the original board to the new board. It then applies the move to the new board and returns it.
@@ -378,24 +378,44 @@ class Board:
         new_board.bishops = dict.copy(self.bishops)
         new_board.rooks = dict.copy(self.rooks)
         new_board.queens = dict.copy(self.queens)
-
         new_board.same_color = dict.copy(self.same_color)
         new_board.all_pieces = np.copy(self.all_pieces)
         new_board.color_turn = self.color_turn
 
+        # Copy en-passant_square
+        new_board.en_passant_square = self.en_passant_square
+
+        # Set the en_passant_square of the current color to None
+        # Because we can only take en-passant directly after the opposite color played double pushes
+        new_board.en_passant_square[new_board.color_turn] = None
+
         # Get the piece at the source square of the move
         piece = self.piece_on(move.src)
 
-        # Clear the source square and the destination square (in case of a capture) on the new board
-        new_board.clear_square(move.src)
-        new_board.clear_square(move.dest, Board.opposite_color(new_board.color_turn))  # Clear the destination square for the opponent's color
+        # If there is an en-passant possibillity and it is a pawn and it choose to take en-passant move
+        if move.en_passant:
+            new_board.clear_square(move.src)
+            # We clear the square behind the destination (en-passant rule)
+            if new_board.color_turn == Color.WHITE:
+                new_board.clear_square(Square(move.dest.position - np.uint8(8)), Board.opposite_color(new_board.color_turn))
+            else:
+                clearing_square = Square(move.dest.position + np.uint8(8))
+                new_board.clear_square(clearing_square, Board.opposite_color(new_board.color_turn))
+        else: # Normal clear
+            # Clear the source square and the destination square (in case of a capture) on the new board
+            new_board.clear_square(move.src)
+            new_board.clear_square(move.dest, Board.opposite_color(new_board.color_turn))  # Clear the destination square for the opponent's color
 
+        # Set the en passant square attribute if the move is a double pawn move
+        if piece == PieceType.PAWN and move.is_double_push():
+            new_board.en_passant_square[new_board.color_turn] = move.dest
+    
         # Set the piece on the destination square, considering promotion if applicable
         new_board.set_square(move.dest, piece if move.promo is None else move.promo)
 
         # Update the color turn on the new board
         new_board.color_turn = Board.opposite_color(new_board.color_turn)
-
+        
         # Return the new board with the move applied
         return new_board
 

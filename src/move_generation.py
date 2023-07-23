@@ -54,6 +54,7 @@ def generate_pawn_moves(board: Board, square: Square) -> np.uint64:
 
     # For captures, filter out moves that do not capture an opponent's piece
     capture = PAWN_CAPTURE[board.color_turn][square.position] & board.same_color[Board.opposite_color(board.color_turn)]
+
     move = EMPTY_BB
 
     # Filter out moves that collide with friendly pieces
@@ -61,7 +62,38 @@ def generate_pawn_moves(board: Board, square: Square) -> np.uint64:
     black_free = Square(square.position - np.uint8(8)).to_bitboard() & board.all_pieces == EMPTY_BB 
     if (board.color_turn == Color.WHITE and white_free) or (board.color_turn == Color.BLACK and black_free):
         move = PAWN_MOVE[board.color_turn][square.position] & ~board.all_pieces
+
     return move | capture
+
+def generate_pawn_enpassant_moves(board: Board, square: Square) -> np.uint64:
+    """
+    Generate legal moves for the pawn on the given square.
+
+    Parameters:
+        board (Board): The chessboard.
+        square (Square): The square containing the pawn.
+
+    Returns:
+        np.array: An array of bitboards representing all legal moves for the pawn.
+    """
+
+    # For captures, filter out moves that do not capture an opponent's piece
+
+    en_passant = EMPTY_BB
+    en_passant_square_color = board.en_passant_square[Board.opposite_color(board.color_turn)]
+    if en_passant_square_color != None:
+        if board.color_turn == Color.BLACK:
+            cond = Square(en_passant_square_color.position - np.uint8(8)).to_bitboard()
+        else:
+            cond = Square(en_passant_square_color.position + np.uint8(8)).to_bitboard()
+
+        #if board.en_passant_square[1] == Color.WHITE:
+        #    cond = Square(board.en_passant_square[0].position - np.uint8(8)).to_bitboard()
+        #else:
+        #    cond = Square(board.en_passant_square[0].position + np.uint8(8)).to_bitboard()
+        en_passant = PAWN_ENPASSANT[board.color_turn][square.position] & cond
+    
+    return en_passant
 
 
 def generate_diag_moves(index: np.uint8, occupancy: np.uint64) -> np.uint64:
@@ -214,6 +246,7 @@ def generate_piece_moves(square: Square, board: Board, piece_type: PieceType):
 
     # Handle pawn promotion moves if the piece is a pawn
     if piece_type == PieceType.PAWN:
+        # Handle promotion
         white_promotion = square.to_bitboard() & RANKS[Rank.SEVEN] != EMPTY_BB
         black_promotion = square.to_bitboard() & RANKS[Rank.TWO] != EMPTY_BB
         if (board.color_turn == Color.WHITE and white_promotion) or (board.color_turn == Color.BLACK and black_promotion):
@@ -223,10 +256,15 @@ def generate_piece_moves(square: Square, board: Board, piece_type: PieceType):
                 yield Move(square, dest, PieceType.KNIGHT)
                 yield Move(square, dest, PieceType.BISHOP)
             return
+        
+        en_passant_moves = generate_pawn_enpassant_moves(board, square)
+        for dest in utils.occupied_squares(en_passant_moves):
+            #print("lol")
+            yield Move(square, dest, en_passant=True)
 
     # Yield regular moves for each destination square
     for dest in utils.occupied_squares(possible_moves):
-        yield Move(square, dest)
+            yield Move(square, dest)
 
 
 def generate_pseudo_legal_moves(board: Board):
@@ -297,10 +335,36 @@ def leaves_in_check(board: Board, move: Move) -> bool:
     return False
 
 
+def perft(board, depth):
+    """
+    Perform a perft search to count the number of legal positions at a given depth.
+
+    Parameters:
+        board (Board): The current chessboard state.
+        depth (int): The depth to search for legal positions.
+
+    Returns:
+        int: The number of legal positions at the given depth.
+    """
+    if depth == 0:
+        # Base case: reached the desired depth, return 1 for the current position.
+        return 1
+
+    count = 0
+    moves = generate_legal_moves(board)
+    for m in moves:
+        new_board = board.apply_move(m)
+        print(f"move choosen= {m} and color turn= {new_board.color_turn}")
+        new_board.print_board()
+        print(f"en-passant= {new_board.en_passant_square}")
+        # For each legal move, recursively calculate the number of legal positions at the next depth.
+        count += perft(new_board, depth-1)
+
+    return count
+
 def main():
-    board = Board()
-    square = Square(1)
-    print(generate_pawn_moves(board=board, square=square))
+    board = Board.from_fen("8/2p5/8/KP5r/8/8/8/8 b - - ")
+    print(perft(board=board, depth=2))
 
 if __name__ == "__main__":
     main()

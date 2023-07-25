@@ -105,8 +105,7 @@ class Board:
                 print(piece, end=' ')
             print()
 
-    @staticmethod
-    def from_fen(fen):
+    def from_fen(self, fen):
         """
         Create a Board instance from a FEN string.
 
@@ -116,7 +115,6 @@ class Board:
         Returns:
             Board: The Board instance initialized from the FEN string.
         """
-        board = Board()
 
         # Split the FEN string into parts: position, turn, castling, en passant, and half move clock
         parts = fen.split(" ")
@@ -134,20 +132,25 @@ class Board:
                 color = Color.WHITE if char.isupper() else Color.BLACK
                 piece = PieceType.from_char(char.lower())
                 square = Square(rank * 8 + file)
-                board.set_square(square, piece, color)
+                self.set_square(square, piece, color)
                 file += 1
 
         # Set the color to play
         if parts[1].lower() == 'w':
-            board.color_turn = Color.WHITE
+            self.color_turn = Color.WHITE
         else:
-            board.color_turn = color.BLACK
+            self.color_turn = color.BLACK
 
         # Castling
         # TODO
 
         # En passant
-        # TODO
+        if parts[3] != "-":
+            if self.color_turn == Color.WHITE:
+                self.en_passant_square[Board.opposite_color(self.color_turn)] = Square(Square.from_string(parts[3]).position - np.uint8(8))
+            else:
+                self.en_passant_square[Board.opposite_color(self.color_turn)] = Square(Square.from_string(parts[3]).position + np.uint8(8))
+
 
         # Halfmove Clock
         # TODO
@@ -155,7 +158,7 @@ class Board:
         #FullMove number
         # TODO
 
-        return board
+        return
 
     def to_fen(self):
         """
@@ -200,8 +203,12 @@ class Board:
         # Castling (to change)
         str_fen += " KQkq"
 
-        # En passant (to change)
-        str_fen += " -"
+        # En passant
+        en_passant_square_color = self.en_passant_square[self.color_turn]
+        if en_passant_square_color != None:
+            str_fen += " " + str(en_passant_square_color)
+        else:
+            str_fen += " -"
 
         # Halfmove Clock (to change)
         str_fen += " 0"

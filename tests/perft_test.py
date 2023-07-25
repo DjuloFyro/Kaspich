@@ -22,16 +22,19 @@ def perft(board, depth):
         int: The number of legal positions at the given depth.
     """
     if depth == 0:
-        # Base case: reached the desired depth, return 1 for the current position.
         return 1
 
-    count = 0
-    moves = generate_legal_moves(board)
-    for m in moves:
-        # For each legal move, recursively calculate the number of legal positions at the next depth.
-        count += perft(board.apply_move(m), depth-1)
+    total_nodes = 0
+    original_en_passant = board.en_passant_square[board.color_turn]  # Store the original en-passant square
 
-    return count
+    for move in generate_legal_moves(board):
+        new_board = board.apply_move(move)
+        total_nodes += perft(new_board, depth - 1)
+
+    board.en_passant_square[board.color_turn] = original_en_passant  # Restore the en-passant square
+
+    return total_nodes
+
 
 class TestBoard(unittest.TestCase):
     def setUp(self) -> None:
@@ -62,10 +65,12 @@ class TestBoard(unittest.TestCase):
         """
         depth4 = perft(self.board, 4)
         #depth5 = perft(self.board, 5)
+        #depth6 = perft(self.board, 6)
 
         # The expected number of legal positions at depth 4 and 5 based on chess perft values.
         self.assertEqual(depth4, 197281)
         #self.assertEqual(depth5, 4865609)
+        #self.assertEqual(depth6, 119060324)
 
 if __name__ == "__main__":
     # Run the test cases

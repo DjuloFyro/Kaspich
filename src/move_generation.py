@@ -259,12 +259,11 @@ def generate_piece_moves(square: Square, board: Board, piece_type: PieceType):
         
         en_passant_moves = generate_pawn_enpassant_moves(board, square)
         for dest in utils.occupied_squares(en_passant_moves):
-            #print("lol")
             yield Move(square, dest, en_passant=True)
 
     # Yield regular moves for each destination square
     for dest in utils.occupied_squares(possible_moves):
-            yield Move(square, dest)
+        yield Move(square, dest)
 
 
 def generate_pseudo_legal_moves(board: Board):
@@ -334,7 +333,6 @@ def leaves_in_check(board: Board, move: Move) -> bool:
 
     return False
 
-
 def perft(board, depth):
     """
     Perform a perft search to count the number of legal positions at a given depth.
@@ -347,23 +345,25 @@ def perft(board, depth):
         int: The number of legal positions at the given depth.
     """
     if depth == 0:
-        # Base case: reached the desired depth, return 1 for the current position.
         return 1
 
-    count = 0
-    moves = generate_legal_moves(board)
-    for m in moves:
-        new_board = board.apply_move(m)
-        print(f"move choosen= {m} and color turn= {new_board.color_turn}")
+    total_nodes = 0
+    original_en_passant = board.en_passant_square[board.color_turn]  # Store the original en-passant square
+
+    for move in generate_legal_moves(board):
+        print(f"move choosen= {move} and color turn= {new_board.color_turn}")
         new_board.print_board()
         print(f"en-passant= {new_board.en_passant_square}")
-        # For each legal move, recursively calculate the number of legal positions at the next depth.
-        count += perft(new_board, depth-1)
+        new_board = board.apply_move(move)
+        total_nodes += perft(new_board, depth - 1)
 
-    return count
+    board.en_passant_square[board.color_turn] = original_en_passant  # Restore the en-passant square
+
+    return total_nodes
 
 def main():
-    board = Board.from_fen("8/2p5/8/KP5r/8/8/8/8 b - - ")
+    board = Board()
+    board.from_fen("8/8/K2p4/1Pp4r/1R3p1k/8/4P1P1/8 w - c6 0 1")
     print(perft(board=board, depth=2))
 
 if __name__ == "__main__":

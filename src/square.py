@@ -50,3 +50,20 @@ class Square:
         r = self.position // 8
         f = self.position % 8
         return "%s%d" % (chr(ord('a')+f), 1+r)
+
+    @classmethod
+    def from_string(cls, square_str):
+        """
+        Create a Square object from a string representation.
+
+        Parameters:
+            square_str (str): The string representation of the square, e.g., "d6".
+
+        Returns:
+            Square: The Square object corresponding to the given string representation.
+        """
+        file_char, rank_str = square_str[0], square_str[1:]
+        file = ord(file_char) - ord('a')
+        rank = int(rank_str) - 1
+        position = rank * 8 + file
+        return cls(position)

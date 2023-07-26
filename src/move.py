@@ -12,7 +12,7 @@ import numpy as np
 from square import Square
 
 class Move:
-    def __init__(self, src: Square, dest: Square, promo=None, en_passant: bool = False):
+    def __init__(self, src: Square, dest: Square, promo=None, en_passant: bool = False, is_castling: bool = False):
         """
         src is Square representing source square
         dst is Square representing destination square
@@ -22,6 +22,7 @@ class Move:
         self.dest = dest
         self.promo = promo
         self.en_passant = en_passant
+        self.is_castling = is_castling
 
     def __str__(self):
         if self.promo:

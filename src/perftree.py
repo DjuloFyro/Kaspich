@@ -1,5 +1,5 @@
 import numpy as np
-from board import Board
+from board import *
 from move import Move
 from move_generation import *
 import sys

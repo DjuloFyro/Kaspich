@@ -133,3 +133,39 @@ def set_square(bitboard: np.uint64, square: Square) -> np.uint64:
     # Perform a bitwise OR operation between the bitboard representation of the square and the given bitboard
     # This sets the bit corresponding to the square to 1
     return square.to_bitboard() | bitboard
+
+
+def squares_between(square1: Square, square2: Square) -> list:
+    """
+    Calculate the squares between two given squares on the chessboard.
+
+    Parameters:
+        square1 (Square): The starting square.
+        square2 (Square): The ending square.
+
+    Returns:
+        list: A list of squares between the two given squares, excluding the starting and ending squares.
+    """
+    if square1.rank != square2.rank and square1.file != square2.file:
+        raise ValueError("Squares are not on the same rank or file")
+
+    squares = []
+    # Determine the direction of movement
+    rank_diff = square2.rank - square1.rank
+    file_diff = square2.file - square1.file
+
+    # Calculate squares between the two given squares
+    if rank_diff == 0:
+        # Same rank, horizontal movement
+        step = 1 if file_diff > 0 else -1
+        for file in range(square1.file + step, square2.file, step):
+            squares.append(Square(square1.rank * 8 + file))
+    elif file_diff == 0:
+        # Same file, vertical movement
+        step = 1 if rank_diff > 0 else -1
+        for rank in range(square1.rank + step, square2.rank, step):
+            squares.append(Square(rank * 8 + square1.file))
+    else:
+        raise ValueError("Squares are not on the same rank or file")
+
+    return squares

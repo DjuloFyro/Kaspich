@@ -308,12 +308,19 @@ class Board:
         
         # Check if there are no pieces between the king and the rook
         squares_between = utils.squares_between(king_pos, rook_pos)
-        if any(self.piece_on(square) is not None for square in squares_between):
+        is_pieces_between = any(self.piece_on(square, color) is not None for square in squares_between for color in (Color.WHITE, Color.BLACK))
+        if is_pieces_between:
             return False
+        
+        traversed_squares = (
+            Square(rook_pos.position - np.uint8(1))
+            if king_side
+            else Square(rook_pos.position + np.uint8(2))
+        )
 
         # Check if the squares the king moves over are not under attack
         squares_to_check = (
-            [king_pos] + utils.squares_between(king_pos, rook_pos) + [rook_pos]
+            [king_pos] + utils.squares_between(king_pos, traversed_squares) + [traversed_squares]
         )
         for square in squares_to_check:
             if self.is_square_attacked(square):
@@ -392,9 +399,9 @@ class Board:
             bool: True if the square is attacked; otherwise, False.
         """
         opp_color = Board.opposite_color(self.color_turn)
-
+    
         opp_pawns = self.get_piece_bb(PieceType.PAWN, color=opp_color)
-        if (PAWN_CAPTURE[opp_color][square.position] & opp_pawns) != EMPTY_BB: 
+        if (PAWN_CAPTURE[self.color_turn][square.position] & opp_pawns) != EMPTY_BB: 
             return True
 
         opp_knights = self.get_piece_bb(PieceType.KNIGHT, color=opp_color)
@@ -775,11 +782,11 @@ def generate_piece_moves(square: Square, board: Board, piece_type: PieceType):
         # King side castling
         if board.can_castle_kingside(board.color_turn): # Check if rook and king have not move
             if board.is_valid_castling(board.color_turn, king_side=True): # check if the castling is valid
-                yield Move(src=board.king_initial_positions[board.color_turn], dest=board.rook_initial_positions[board.color_turn]["king_side"], is_castling=True)
+                yield Move(src=board.king_initial_positions[board.color_turn], dest=Square(board.king_initial_positions[board.color_turn].position + np.uint8(2)), is_castling=True)
         # Queen side castling
         if board.can_castle_queenside(board.color_turn):
             if board.is_valid_castling(board.color_turn, king_side=False):
-                yield Move(src=board.king_initial_positions[board.color_turn], dest=board.rook_initial_positions[board.color_turn]["queen_side"], is_castling=True)
+                yield Move(src=board.king_initial_positions[board.color_turn], dest=Square(board.king_initial_positions[board.color_turn].position - np.uint8(2)), is_castling=True)
 
     # Yield regular moves for each destination square
     for dest in utils.occupied_squares(possible_moves):
@@ -906,8 +913,8 @@ def perft(board, depth):
 
 def main():
     board = Board()
-    board.from_fen("8/8/K2p4/1Pp4r/1R3p1k/8/4P1P1/8 w - c6 0 1")
-    print(perft(board=board, depth=2))
+    board.from_fen("r3k2r/p1ppqpb1/1n2pnp1/3PN3/1p2P3/2N2Q1p/PPPB1PPP/R2BKB1R w kq -")
+    print(perft(board=board, depth=1))
 
 if __name__ == "__main__":
     main()

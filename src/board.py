@@ -47,6 +47,11 @@ class Board:
         # Initialize the en passant square attribute to None
         self.en_passant_square = {Color.WHITE: None, Color.BLACK: None}
 
+        # Initialize attributes to track whether the king and rooks have moved for both colors
+        self.king_moved = {Color.WHITE: False, Color.BLACK: False}
+        self.rook_moved = {Color.WHITE: {"queen_side": False, "king_side": False},
+                           Color.BLACK: {"queen_side": False, "king_side": False}}
+        
         # Define the initial positions of kings and rooks for both colors for castling
         self.king_initial_positions = {
             Color.WHITE: Square(4),  # Starting position of the white king (e1)
@@ -242,6 +247,30 @@ class Board:
         str_fen += " 1"
 
         return str_fen
+
+    def can_castle_kingside(self, color: Color) -> bool:
+        """
+        Check if the player with the given color can castle kingside.
+
+        Parameters:
+            color (Color): The color of the player (Color.WHITE or Color.BLACK).
+
+        Returns:
+            bool: True if castling kingside is possible, False otherwise.
+        """
+        return not self.king_moved[color] and not self.rook_moved[color]["king_side"]
+
+    def can_castle_queenside(self, color: Color) -> bool:
+        """
+        Check if the player with the given color can castle queenside.
+
+        Parameters:
+            color (Color): The color of the player (Color.WHITE or Color.BLACK).
+
+        Returns:
+            bool: True if castling queenside is possible, False otherwise.
+        """
+        return not self.king_moved[color] and not self.rook_moved[color]["queen_side"]
     
 
     def is_valid_castling(self, color: Color, king_side: bool = True):
@@ -268,7 +297,7 @@ class Board:
 
         if king != PieceType.KING or rook != PieceType.ROOK:
             return False
-
+        
         # Check if there are no pieces between the king and the rook
         squares_between = utils.squares_between(king_pos, rook_pos)
         if any(self.piece_on(square) is not None for square in squares_between):
@@ -736,11 +765,13 @@ def generate_piece_moves(square: Square, board: Board, piece_type: PieceType):
     # Check for castling
     if piece_type == PieceType.KING:
         # King side castling
-        if board.is_valid_castling(board.color_turn, king_side=True):
-            yield Move(src=board.king_initial_positions[board.color_turn], dest=board.rook_initial_positions[board.color_turn]["king_side"], is_castling=True)
+        if board.can_castle_kingside(board.color_turn): # Check if rook and king have not move
+            if board.is_valid_castling(board.color_turn, king_side=True): # check if the castling is valid
+                yield Move(src=board.king_initial_positions[board.color_turn], dest=board.rook_initial_positions[board.color_turn]["king_side"], is_castling=True)
         # Queen side castling
-        if board.is_valid_castling(board.color_turn, king_side=False):
-            yield Move(src=board.king_initial_positions[board.color_turn], dest=board.rook_initial_positions[board.color_turn]["queen_side"], is_castling=True)
+        if board.can_castle_queenside(board.color_turn):
+            if board.is_valid_castling(board.color_turn, king_side=False):
+                yield Move(src=board.king_initial_positions[board.color_turn], dest=board.rook_initial_positions[board.color_turn]["queen_side"], is_castling=True)
 
     # Yield regular moves for each destination square
     for dest in utils.occupied_squares(possible_moves):
@@ -844,6 +875,22 @@ def perft(board, depth):
         print(f"en-passant= {board.en_passant_square}")
         new_board = board.apply_move(move)
         total_nodes += perft(new_board, depth - 1)
+        
+         # Check if the move involves the king or rook and update their moved status (for the castling availability)
+        piece = new_board.piece_on(move.src)
+
+        if piece == PieceType.KING:
+            new_board.king_moved[new_board.color_turn] = True
+        elif piece == PieceType.ROOK:
+            if move.src == Square(0):
+                new_board.rook_moved[Color.WHITE]["queen_side"] = True
+            if move.src == Square(7):
+                new_board.rook_moved[Color.WHITE]["king_side"] = True
+            if move.src == Square(56):
+                new_board.rook_moved[Color.BLACK]["queen_side"] = True
+            if move.src == Square(63):
+                new_board.rook_moved[Color.BLACK]["king_side"] = True
+
 
     board.en_passant_square[board.color_turn] = original_en_passant  # Restore the en-passant square
 

@@ -29,6 +29,22 @@ def perft(board, depth):
     for move in generate_legal_moves(board):
         new_board = board.apply_move(move)
         total_nodes += perft(new_board, depth - 1)
+        
+        # Check if the move involves the king or rook and update their moved status (for the castling availability)
+        piece = new_board.piece_on(move.src)
+
+        if piece == PieceType.KING:
+            new_board.king_moved[new_board.color_turn] = True
+        elif piece == PieceType.ROOK:
+            if move.src == Square(0):
+                new_board.rook_moved[Color.WHITE]["queen_side"] = True
+            if move.src == Square(7):
+                new_board.rook_moved[Color.WHITE]["king_side"] = True
+            if move.src == Square(56):
+                new_board.rook_moved[Color.BLACK]["queen_side"] = True
+            if move.src == Square(63):
+                new_board.rook_moved[Color.BLACK]["king_side"] = True
+
 
     board.en_passant_square[board.color_turn] = original_en_passant  # Restore the en-passant square
 

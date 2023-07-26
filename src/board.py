@@ -172,7 +172,7 @@ class Board:
             self.color_turn = color.BLACK
 
         # Castling
-        # TODO
+        # Change nothing with our implementation
 
         # En passant
         if parts[3] != "-":
@@ -226,12 +226,20 @@ class Board:
         str_fen = "/".join(fen)
 
         if self.color_turn == Color.WHITE:
-            str_fen += " w"
+            str_fen += " w "
         else:
-            str_fen += " b"
+            str_fen += " b "
 
-        # Castling (to change)
-        str_fen += " KQkq"
+        # Castling
+        if self.can_castle_kingside(Color.WHITE) and self.is_valid_castling(color.WHITE, king_side=True):
+            str_fen += "K"
+        if self.can_castle_queenside(Color.WHITE) and self.is_valid_castling(color.WHITE, king_side=False):
+            str_fen += "Q"
+        if self.can_castle_kingside(Color.BLACK) and self.is_valid_castling(color.BLACK, king_side=True):
+            str_fen += "k"
+        if self.can_castle_queenside(Color.BLACK) and self.is_valid_castling(color.BLACK, king_side=False):
+            str_fen += "q"
+        
 
         # En passant
         en_passant_square_color = self.en_passant_square[self.color_turn]

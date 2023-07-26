@@ -1,5 +1,4 @@
 import unittest
-import numpy as np
 import sys
 import os
 
@@ -8,8 +7,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(current_dir, "..", "src")
 sys.path.insert(0, src_dir)
 
-from board import Board
-from move_generation import *
+from board import *
 
 class TestBoard(unittest.TestCase):
     def setUp(self) -> None:

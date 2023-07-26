@@ -7,8 +7,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(current_dir, "..", "src")
 sys.path.insert(0, src_dir)
 
-from board import Board
-from move_generation import *
+from board import *
 
 def perft(board, depth):
     """

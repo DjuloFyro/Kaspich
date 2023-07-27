@@ -39,3 +39,7 @@
 ## About The Project
 
 
+<!-- CONTACT -->
+## Contact
+
+Julian Gil - juliangil2424@gmail.com

@@ -38,8 +38,16 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+### Built With
+
+![Next][Next.js]
+
+
 
 <!-- CONTACT -->
 ## Contact
 
 Julian Gil - juliangil2424@gmail.com
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[Next.js]: https://img.shields.io/badge/python-000000?style=for-the-badge&logo=python&logoColor=white

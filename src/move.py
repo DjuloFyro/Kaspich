@@ -52,6 +52,14 @@ class Move:
     
     def is_double_push(self):
         return abs(self.src.rank - self.dest.rank) == 2
+    
+    def __eq__(self, other):
+        """
+        Override the equality operator to compare moves based on their properties.
+        """
+        if isinstance(other, Move):
+            return self.src == other.src and self.dest == other.dest
+        return False
 
 
 

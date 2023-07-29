@@ -67,3 +67,11 @@ class Square:
         rank = int(rank_str) - 1
         position = rank * 8 + file
         return cls(position)
+
+    def __eq__(self, other):
+        """
+        Override the equality operator to compare moves based on their properties.
+        """
+        if isinstance(other, Square):
+            return self.position == other.position
+        return False

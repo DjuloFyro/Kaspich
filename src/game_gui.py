@@ -76,24 +76,31 @@ def handle_mouse_click(board, location, dragging, selected_piece, possible_moves
         dragging = True
     return selected_piece, possible_moves, dragging, selected_piece_square
 
-def handle_mouse_release(board, dragging, selected_piece, possible_moves, selected_piece_square):
+def handle_mouse_release(board : Board, dragging, selected_piece, possible_moves, selected_piece_square):
     if dragging and selected_piece is not None:
         location = p.mouse.get_pos()
         file = location[0] // SQ_SIZE
         rank = 7 - (location[1] // SQ_SIZE)
         target_square = Square(rank * 8 + file)
+        # AJOUTER LE CAS EN PASSANT OU CASTLINGx
         move = Move(selected_piece_square, target_square)
-
         if move in possible_moves:
+            # Check for en-passant move and set the en_passant attribute
+            if selected_piece.to_char().lower() == 'p' and board.piece_on(target_square) is None:
+                move.en_passant = True
+
+            # Check for castling move and set the is_castling attribute
+            if selected_piece.to_char().lower() == 'k' and abs(target_square.file - selected_piece_square.file) == 2:
+                move.is_castling = True
             if selected_piece.to_char().lower() == 'p' and target_square.rank in [0, 7]:
                 # Automatically promote the pawn to a queen
                 move.promo = PieceType.QUEEN
-                board = board.apply_move(move=move)
-            else:
-                board = board.apply_move(move=move)
+            board = board.apply_move(move=move)
+            board.print_board()
         selected_piece = None
         possible_moves = []
         dragging = False
+   
     return board, selected_piece, possible_moves, dragging
 
 def play(config):

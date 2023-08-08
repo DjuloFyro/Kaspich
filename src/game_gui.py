@@ -154,8 +154,19 @@ def play(config):
                         x = location[0] - SQ_SIZE // 2
                         y = location[1] - SQ_SIZE // 2
         else: # CASE PLAYER VS MTCS IA
-            continue
-            # TODO
+            if board.color_turn == config[1]:
+                board = mtcs_bot(board=board, color=Color.BLACK)
+            else:
+                if e.type == p.MOUSEBUTTONDOWN:
+                    location = p.mouse.get_pos()
+                    selected_piece, possible_moves, dragging, selected_piece_square = handle_mouse_click(board, location, dragging, selected_piece, possible_moves)
+                elif e.type == p.MOUSEBUTTONUP:
+                    board, selected_piece, possible_moves, dragging = handle_mouse_release(board, dragging, selected_piece, possible_moves, selected_piece_square)
+                elif e.type == p.MOUSEMOTION:
+                    if dragging and selected_piece is not None:
+                        location = p.mouse.get_pos()
+                        x = location[0] - SQ_SIZE // 2
+                        y = location[1] - SQ_SIZE // 2
             
         draw_game_state(screen=SCREEN, board=board)
         if dragging:
@@ -234,7 +245,7 @@ def bot_algorithm_option():
                 elif IA_RANDOM.checkForInput(OPTIONS_MOUSE_POS):
                     bot_color_option(("random", None))
                 elif IA_MCTS.checkForInput(OPTIONS_MOUSE_POS):
-                    # TODO
+                    bot_color_option(("mtcs", None))
                     continue
 
         p.display.update()

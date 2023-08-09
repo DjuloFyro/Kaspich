@@ -328,7 +328,6 @@ class Board:
 
         return True
 
-
     '''----------------------------------------------------- Pieces manipulation for chess board ---------------------------------------------------------------'''
     '''---------------------------------------------------------------------------------------------------------------------------------------------------------'''
 
@@ -598,7 +597,8 @@ class Board:
 
         # Update the color turn on the new board
         new_board.color_turn = Board.opposite_color(new_board.color_turn)
-        
+     
+        #new_board.print_board()
         # Return the new board with the move applied
         return new_board
     
@@ -863,6 +863,113 @@ def leaves_in_check(board: Board, move: Move) -> bool:
 
     return False
 
+'''---------------------------------------------------------------- Meta data for a game -------------------------------------------------------------------------------'''
+'''-------------------------------------------------------------------------------------------------------------------------------------------------------------------'''
+
+def is_game_over(board: Board) -> bool:
+    """ Return True if the game is finished (a winner or a draw)
+
+    Parameters:
+        board(Board) : The current state of the Board
+    """
+    return is_checkmate(board) or is_draw(board)
+
+def is_checkmate(board: Board) -> bool:
+    """ Check if there is no legal moves (meaning a checkmate)
+
+    Parameters:
+        board(Board) : The current state of the Board
+    """
+    return has_legal_moves(board)
+
+def is_stalemate(board: Board) -> bool:
+    """Check if the current player is not in check and has legal moves
+
+    Parameters:
+        board(Board) : The current state of the board
+    """
+    king_square = Square(utils.lsb_bitscan(board.get_piece_bb(PieceType.KING)))
+
+    if not board.is_square_attacked(king_square) and has_legal_moves(board):
+        return True
+    return False
+
+def has_legal_moves(board: Board) -> bool:
+    """Check if the current board has any legal moves
+
+    Parameters:
+        board(Board) : the current state of the board
+    """
+    if list(generate_legal_moves(board)) == []:
+        return True
+    return False
+
+def is_insufficient_material(board: Board) -> bool:
+    """
+    Check if there is insufficient material on the board for checkmate.
+    
+    Returns:
+        bool: True if there is insufficient material, False otherwise.
+    """
+
+    is_queen_white = board.get_piece_bb(PieceType.QUEEN, Color.WHITE) != EMPTY_BB
+    is_queen_black = board.get_piece_bb(PieceType.QUEEN, Color.BLACK) != EMPTY_BB
+
+    is_knight_white = board.get_piece_bb(PieceType.KNIGHT, Color.WHITE) != EMPTY_BB
+    is_knight_black = board.get_piece_bb(PieceType.KNIGHT, Color.BLACK) != EMPTY_BB
+
+    is_bishop_white = board.get_piece_bb(PieceType.BISHOP, Color.WHITE) != EMPTY_BB
+    is_bishop_black = board.get_piece_bb(PieceType.BISHOP, Color.BLACK) != EMPTY_BB
+
+    is_rook_white = board.get_piece_bb(PieceType.ROOK, Color.WHITE) != EMPTY_BB
+    is_rook_black = board.get_piece_bb(PieceType.ROOK, Color.BLACK) != EMPTY_BB
+
+    is_pawn_white = board.get_piece_bb(PieceType.PAWN, Color.WHITE) != EMPTY_BB
+    is_pawn_black = board.get_piece_bb(PieceType.PAWN, Color.BLACK) != EMPTY_BB
+
+    nothing_except_black_king = (not is_queen_black and not is_knight_black and not is_bishop_black and not is_rook_black and not is_pawn_black)
+    nothing_except_white_king = (not is_queen_white and not is_knight_white and not is_bishop_white and not is_rook_white and not is_pawn_white)
+
+    only_black_bishop_king = (not is_queen_black and not is_knight_black and not is_rook_black and not is_pawn_black)
+    only_white_bishop_king = (not is_queen_white and not is_knight_white and not is_rook_white and not is_pawn_white)
+
+    only_black_knight_king = (not is_queen_black and not is_bishop_black and not is_rook_black and not is_pawn_black)
+    only_white_knight_king = (not is_queen_white and not is_bishop_white and not is_rook_white and not is_pawn_white)
+
+    # Case King vs. king
+    if (nothing_except_black_king and nothing_except_white_king):
+        return True
+    
+    # King and bishop vs. king
+    if (nothing_except_black_king and only_white_bishop_king) or (nothing_except_white_king and only_black_bishop_king):
+        return True
+    
+    # King and knight vs. king
+    if (nothing_except_black_king and only_white_knight_king) or (nothing_except_white_king and only_black_knight_king):
+        return True
+
+    return False
+  
+def is_draw(board: Board) -> bool:
+    """Return True if the game is a draw
+
+    Parameters:
+        board(Board) : The current state of the board
+    """
+    return is_stalemate(board) or is_insufficient_material(board)
+
+def get_outcome(board: Board):
+    """Return True if the game is a draw
+
+    Parameters:
+        board(Board) : The current state of the board
+    """
+    if list(generate_legal_moves(board)) == [] and board.color_turn == Color.WHITE:
+        return Color.BLACK
+    if list(generate_legal_moves(board)) == [] and board.color_turn == Color.BLACK:
+        return Color.WHITE
+    return None
+
 
 '''---------------------------------------------------------------- Perft and test -----------------------------------------------------------------------------------'''
 '''-------------------------------------------------------------------------------------------------------------------------------------------------------------------'''
@@ -885,10 +992,10 @@ def perft(board, depth):
     original_en_passant = board.en_passant_square[board.color_turn]  # Store the original en-passant square
 
     for move in generate_legal_moves(board):
-        print(f"move choosen= {move} and color turn= {board.color_turn}")
-        board.print_board()
-        print(f"en-passant= {board.en_passant_square}")
         new_board = board.apply_move(move)
+        print(f"move choosen= {move} and color turn= {board.color_turn}")
+        new_board.print_board()
+        print(f"en-passant= {board.en_passant_square}")
         total_nodes += perft(new_board, depth - 1)
         
          # Check if the move involves the king or rook and update their moved status (for the castling availability)
@@ -913,7 +1020,7 @@ def perft(board, depth):
 
 def main():
     board = Board()
-    board.from_fen("r3k2r/p1ppqpb1/1n2pnp1/3PN3/1p2P3/2N2Q1p/PPPB1PPP/R2BKB1R w kq -")
+    board.from_fen("rnbqkbnr/pppp1ppp/8/3Pp3/8/8/8/8 w - e6")
     print(perft(board=board, depth=1))
 
 if __name__ == "__main__":

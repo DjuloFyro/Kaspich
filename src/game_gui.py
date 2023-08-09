@@ -67,6 +67,9 @@ def draw_pieces(screen: p.Surface, board: Board):
 
 
 def handle_mouse_click(board, location, dragging, selected_piece, possible_moves):
+    """
+    Selecting a piece to move when the mouse is clicked
+    """
     file = location[0] // SQ_SIZE
     rank = 7 - (location[1] // SQ_SIZE)
     selected_piece = board.piece_on(Square(rank * 8 + file))
@@ -77,6 +80,9 @@ def handle_mouse_click(board, location, dragging, selected_piece, possible_moves
     return selected_piece, possible_moves, dragging, selected_piece_square
 
 def handle_mouse_release(board : Board, dragging, selected_piece, possible_moves, selected_piece_square):
+    """
+    Moving the piece on the GUI when mouse is released
+    """
     if dragging and selected_piece is not None:
         location = p.mouse.get_pos()
         file = location[0] // SQ_SIZE
@@ -128,20 +134,14 @@ def play(config):
                 p.quit()
                 sys.exit()
         
-        if config == None: # CASE PLAYER VS PLAYER
-            if e.type == p.MOUSEBUTTONDOWN:
-                location = p.mouse.get_pos()
-                selected_piece, possible_moves, dragging, selected_piece_square = handle_mouse_click(board, location, dragging, selected_piece, possible_moves)
-            elif e.type == p.MOUSEBUTTONUP:
-                board, selected_piece, possible_moves, dragging = handle_mouse_release(board, dragging, selected_piece, possible_moves, selected_piece_square)
-            elif e.type == p.MOUSEMOTION:
-                if dragging and selected_piece is not None:
-                    location = p.mouse.get_pos()
-                    x = location[0] - SQ_SIZE // 2
-                    y = location[1] - SQ_SIZE // 2
+        if config == None: # CASE IA VS IA
+            if board.color_turn == Color.WHITE:
+                board = random_bot(board=board)
+            else:
+                board = mtcs_bot(board=board)
         elif config[0] == "random": # CASE PLAYER VS RANDOM IA
             if board.color_turn == config[1]:
-                board = random_bot(board=board, color=Color.BLACK)
+                board = random_bot(board=board)
             else:
                 if e.type == p.MOUSEBUTTONDOWN:
                     location = p.mouse.get_pos()
@@ -155,7 +155,7 @@ def play(config):
                         y = location[1] - SQ_SIZE // 2
         else: # CASE PLAYER VS MTCS IA
             if board.color_turn == config[1]:
-                board = mtcs_bot(board=board, color=Color.BLACK)
+                board = mtcs_bot(board=board)
             else:
                 if e.type == p.MOUSEBUTTONDOWN:
                     location = p.mouse.get_pos()
@@ -178,6 +178,9 @@ def play(config):
         p.display.flip()
 
 def bot_color_option(config):
+    """
+    Display the bot color menu
+    """
     while True:
         OPTIONS_MOUSE_POS = p.mouse.get_pos()
 
@@ -215,6 +218,9 @@ def bot_color_option(config):
         p.display.update()
 
 def bot_algorithm_option():
+    """
+    display the algorithm option menu
+    """
     while True:
         OPTIONS_MOUSE_POS = p.mouse.get_pos()
 
@@ -251,6 +257,9 @@ def bot_algorithm_option():
         p.display.update()
 
 def main_menu():
+    """
+    Display the main menu
+    """
     p.display.set_caption("Menu")
 
     while True:
@@ -264,14 +273,14 @@ def main_menu():
 
         PLAY_IA_VS_PLAYER = Button(image=None, pos=(256, 250), 
                             text_input="PLAYER VS IA", font=get_font(60), base_color="black", hovering_color="White")
-        PLAY_PLAYER_VS_PLAYER = Button(image=None, pos=(256, 350), 
-                            text_input="PLAYER VS PLAYER", font=get_font(60), base_color="black", hovering_color="White")
+        PLAY_IA_VS_IA = Button(image=None, pos=(256, 350), 
+                            text_input="IA VS IA", font=get_font(60), base_color="black", hovering_color="White")
         QUIT_BUTTON = Button(image=None, pos=(256, 450), 
                             text_input="EXIT", font=get_font(60), base_color="black", hovering_color="White")
 
         SCREEN.blit(MENU_TEXT, MENU_RECT)
 
-        for button in [PLAY_IA_VS_PLAYER, PLAY_PLAYER_VS_PLAYER, QUIT_BUTTON]:
+        for button in [PLAY_IA_VS_PLAYER, PLAY_IA_VS_IA, QUIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
         
@@ -282,7 +291,7 @@ def main_menu():
             if event.type == p.MOUSEBUTTONDOWN:
                 if PLAY_IA_VS_PLAYER.checkForInput(MENU_MOUSE_POS):
                     bot_algorithm_option()
-                if PLAY_PLAYER_VS_PLAYER.checkForInput(MENU_MOUSE_POS):
+                if PLAY_IA_VS_IA.checkForInput(MENU_MOUSE_POS):
                     play(None)
                     continue
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):

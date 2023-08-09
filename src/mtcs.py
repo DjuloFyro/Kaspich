@@ -23,7 +23,7 @@ class MCTSNode:
             children(dict) : children to add to the current node
         """
         for child in children:
-            self.children[child.move] = child
+            self.children[str(child.move)] = child
 
 
     def uct(self, exploration_factor: float = EXPLORATION_FACTOR):
@@ -63,8 +63,8 @@ class MTCS:
 
         while len(node.children) != 0:
             children = node.children.values()
-            max_value = max(children, key=lambda n : n.value()).value()
-            max_nodes = [node for node in children if node.value() == max_value]
+            max_value = max(children, key=lambda n : n.uct()).uct()
+            max_nodes = [n for n in children if n.uct() == max_value]
 
             node = random.choice(max_nodes)
 
@@ -83,11 +83,15 @@ class MTCS:
         """
         Create a new child node corresponding to an unexplored legal move
         Update the game state according to the selected move
+
+        Parameters:
+            parent(MTCSNode) : Parent of the current node
+            state(Board) : State of the current board
         """
-        if state.is_game_over():
+        if is_game_over(state):
             return False
     
-        children = [MCTSNode(move) for move in generate_legal_moves(state)]
+        children = [MCTSNode(move, parent) for move in generate_legal_moves(state)]
 
         parent.add_children(children)
 
@@ -102,14 +106,19 @@ class MTCS:
         Return:
             the result of the simulation (e.g., +1 for win, -1 for loss, 0 for draw)
         """
-        while not state.is_game_over():
-            state = state.apply_move(random.choice(generate_legal_moves(state)))
+        while not is_game_over(state):
+            state = state.apply_move(random.choice(list(generate_legal_moves(state))))
         
-        return state.get_outcome()
+        return get_outcome(state)
     
     def backpropagate(self, node: MCTSNode, turn: int, outcome: int):
         """
         Update the node's visits and reward statistics, and propagate the update up the tree
+
+        Parameters:
+            node(MTCSNode) : Current node to begin backprop
+            turn(int) : The turn color
+            outcome(int) : the result of the simulation (e.g., +1 for win, -1 for loss, 0 for draw)
         """
         reward = 0 if outcome == turn else 1
 
@@ -118,7 +127,7 @@ class MTCS:
             node.Q += reward
             node = node.parent
 
-            if outcome == draw:
+            if outcome == is_draw(self.root_state):
                 reward = 0
             else:
                 reward = 1 - reward
@@ -126,6 +135,12 @@ class MTCS:
     
 
     def mtcs_search(self, time_limit: int):
+        """
+        Launch the monte carlo tree search (selection, expansion, simulation, backpropagation)
+
+        Parameters:
+            time_limit(int) : time limit to search in the tree
+        """
         start_time = time.process_time()
 
         num_rollouts = 0
@@ -140,11 +155,17 @@ class MTCS:
         self.run_time = run_time
         self.num_rollouts = num_rollouts
 
-    def choose_best_move(self):
-        if self.root_state.is_game_over():
-            return -1
+    def choose_best_move(self) -> Move:
+        """
+        Choose the best move in the mtcs (choosing the node with the most total game played)
+
+        Return:
+            Move : the best move choosen
+        """
+        if is_game_over(self.root_state):
+            return None
         
-        max_value = max(self.root.children.values, key=lambda n: n.N).N
+        max_value = max(self.root.children.values(), key=lambda n: n.N).N
         max_nodes = [node for node in self.root.children.values() if node.N == max_value]
         best_child = random.choice(max_nodes)
 
@@ -153,8 +174,17 @@ class MTCS:
     def move(self, move: Move):
         if move in self.root.children:
             self.root_state = self.root_state.apply_move(move)
-            self.root = self.root.children[move]
+            self.root = self.root.children[str(move)]
             return
         
         self.root_state = self.root_state.apply_move(move)
         self.root = MCTSNode(None, None)
+
+    def statistics(self) -> tuple:
+        """
+        Get statistics of the MTCS
+
+        Return:
+            Tuple : the number of rollout and the run_time
+        """
+        return self.num_rollouts, self.run_time

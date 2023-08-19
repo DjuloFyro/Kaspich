@@ -8,6 +8,7 @@ You can find:
 
 from board import *
 from mtcs import *
+from minmax import *
 import random
 
 def random_bot(board: Board) -> Board:
@@ -28,6 +29,21 @@ def random_bot(board: Board) -> Board:
 
     return board.apply_move(move=move)
 
+
+def minmax_bot(board: Board) -> Board:
+    """ Minmax bot making a move using min-max algorithm
+
+    Parameters:
+        board(Board) : Current state of the board
+    
+    Return:
+        Board : The new board afther the min max bot move
+    """
+
+    mv = best_move(board, 3)
+    return board.apply_move(move=mv)
+
+
 def mtcs_bot(board: Board) -> Board:
     """ MTCS bot making a move using monte carlo tree search algorithm
 
@@ -40,7 +56,7 @@ def mtcs_bot(board: Board) -> Board:
 
     # Construct the monte carlo search with a time limit of search 
     mcts = MTCS(state=board)
-    mcts.mtcs_search(3)
+    mcts.mtcs_search(15)
 
     # Get and print the statistics
     num_rollouts, run_time = mcts.statistics()

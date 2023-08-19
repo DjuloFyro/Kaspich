@@ -61,7 +61,7 @@ def occupied_squares(bitboard: np.uint64):
         bitboard ^= lsb_square.to_bitboard()
 
 
-'''
+
 # Precomputed lookup table for counting set bits in 16-bit parts
 BIT_COUNT_LOOKUP = np.array(
     [bin(i).count("1") for i in range(65536)],
@@ -84,7 +84,13 @@ def population_count(bb: np.uint64) -> np.uint8:
     count += BIT_COUNT_LOOKUP[(bb >> 32) & 0xFFFF]
     count += BIT_COUNT_LOOKUP[(bb >> 48) & 0xFFFF]
     return count
-'''
+
+def pop_count(bb):
+    count = np.uint8(0)
+    while bb != EMPTY_BITBOARD:
+        count += np.uint8(1)
+        bb &= bb - np.uint64(1)
+    return count
 
 
 def is_set(bitboard: np.uint64, square: Square) -> bool:

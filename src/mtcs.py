@@ -3,9 +3,10 @@ from board import *
 from copy import deepcopy
 import random
 import time
+from evaluation import *
 
 
-EXPLORATION_FACTOR = 0.1
+EXPLORATION_FACTOR = math.sqrt(2)
 
 class MCTSNode:
     def __init__(self, move: Move, parent=None):
@@ -109,7 +110,7 @@ class MTCS:
         while not is_game_over(state):
             state = state.apply_move(random.choice(list(generate_legal_moves(state))))
         
-        return get_outcome(state)
+        return evaluate(state)
     
     def backpropagate(self, node: MCTSNode, turn: int, outcome: int):
         """
@@ -120,18 +121,11 @@ class MTCS:
             turn(int) : The turn color
             outcome(int) : the result of the simulation (e.g., +1 for win, -1 for loss, 0 for draw)
         """
-        reward = 0 if outcome == turn else 1
 
         while node is not None:
             node.N += 1
-            node.Q += reward
+            node.Q += outcome
             node = node.parent
-
-            if outcome == is_draw(self.root_state):
-                reward = 0
-            else:
-                reward = 1 - reward
-
     
 
     def mtcs_search(self, time_limit: int):

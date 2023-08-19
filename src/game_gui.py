@@ -138,7 +138,7 @@ def play(config):
             if board.color_turn == Color.WHITE:
                 board = random_bot(board=board)
             else:
-                board = mtcs_bot(board=board)
+                board = minmax_bot(board=board)
         elif config[0] == "random": # CASE PLAYER VS RANDOM IA
             if board.color_turn == config[1]:
                 board = random_bot(board=board)
@@ -153,9 +153,9 @@ def play(config):
                         location = p.mouse.get_pos()
                         x = location[0] - SQ_SIZE // 2
                         y = location[1] - SQ_SIZE // 2
-        else: # CASE PLAYER VS MTCS IA
+        else: # CASE PLAYER VS minmax IA
             if board.color_turn == config[1]:
-                board = mtcs_bot(board=board)
+                board = minmax_bot(board=board)
             else:
                 if e.type == p.MOUSEBUTTONDOWN:
                     location = p.mouse.get_pos()
@@ -170,10 +170,11 @@ def play(config):
             
         draw_game_state(screen=SCREEN, board=board)
         if dragging:
-            if board.color_turn == Color.WHITE:
-                SCREEN.blit(IMAGES[selected_piece.to_char().upper()], p.Rect(x, y, SQ_SIZE, SQ_SIZE))
-            else:
-                SCREEN.blit(IMAGES[selected_piece.to_char()], p.Rect(x, y, SQ_SIZE, SQ_SIZE))
+            if selected_piece != None:
+                if board.color_turn == Color.WHITE:
+                    SCREEN.blit(IMAGES[selected_piece.to_char().upper()], p.Rect(x, y, SQ_SIZE, SQ_SIZE))
+                else:
+                    SCREEN.blit(IMAGES[selected_piece.to_char()], p.Rect(x, y, SQ_SIZE, SQ_SIZE))
 
         p.display.flip()
 
@@ -232,12 +233,12 @@ def bot_algorithm_option():
 
         IA_RANDOM = Button(image=None, pos=(156, 300), 
                             text_input="RANDOM", font=get_font(55), base_color="Black", hovering_color="Green")
-        IA_MCTS = Button(image=None, pos=(400, 300), 
-                            text_input="MCTS", font=get_font(55), base_color="Black", hovering_color="Green")
+        IA_MINMAX = Button(image=None, pos=(400, 300), 
+                            text_input="MINMAX", font=get_font(55), base_color="Black", hovering_color="Green")
         OPTIONS_BACK = Button(image=None, pos=(256, 456), 
                             text_input="BACK", font=get_font(60), base_color="Black", hovering_color="Green")
 
-        for button in [IA_RANDOM, IA_MCTS, OPTIONS_BACK]:
+        for button in [IA_RANDOM, IA_MINMAX, OPTIONS_BACK]:
             button.changeColor(OPTIONS_MOUSE_POS)
             button.update(SCREEN)
 
@@ -250,7 +251,7 @@ def bot_algorithm_option():
                     main_menu()
                 elif IA_RANDOM.checkForInput(OPTIONS_MOUSE_POS):
                     bot_color_option(("random", None))
-                elif IA_MCTS.checkForInput(OPTIONS_MOUSE_POS):
+                elif IA_MINMAX.checkForInput(OPTIONS_MOUSE_POS):
                     bot_color_option(("mtcs", None))
                     continue
 

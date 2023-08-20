@@ -1,10 +1,6 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <!--<a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>-->
-
   <h1 align="center">Kaspich - Chess AI Engine</h1>
 </div>
 
@@ -45,6 +41,12 @@ Several algorithms have been employed within the AI, with the most efficient bei
 You can engage in gameplay using a GUI built with Pygame.
 In the "IA VS IA" section, a random algorithm is pitted against the Negamax algorithm.
 In the "PLAYER VS IA" section, you can challenge the AI using the Negamax algorithm.
+
+
+
+<a>
+<img src="images/gameplay.gif" alt="Logo" widht="500" height="500">
+</a>
 
 ### Built With
 
